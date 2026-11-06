@@ -801,6 +801,8 @@ fun SettingsScreen(
     var sendspinDelayInput by remember(currentSendspinDelay) { mutableStateOf(currentSendspinDelay) }
 
     var showServerSubmenu by remember { mutableStateOf(false) }
+    var insecureConnectionConfirmed by remember(hostInput, portInput) { mutableStateOf(false) }
+    val isInsecureConnection = !hostInput.trim().startsWith("https://", ignoreCase = true)
 
     BackHandler(enabled = showServerSubmenu) {
         showServerSubmenu = false
@@ -969,6 +971,27 @@ fun SettingsScreen(
                     }
                 }
 
+                        if (isInsecureConnection) {
+                            Card(
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFF3A2B16)),
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text("Conexión sin cifrado (HTTP/WS)", color = Color(0xFFFFD180), fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                                    Text(
+                                        text = "El usuario, la contraseña, los tokens y los datos intercambiados pueden quedar expuestos a otros dispositivos de la red. En redes locales puede ser necesario para servidores sin TLS. Para servidores remotos, utiliza HTTPS/WSS.",
+                                        color = Color.White, fontSize = 12.sp, lineHeight = 16.sp,
+                                        modifier = Modifier.padding(top = 6.dp)
+                                    )
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 8.dp)) {
+                                        Checkbox(checked = insecureConnectionConfirmed, onCheckedChange = { insecureConnectionConfirmed = it })
+                                        Text("Entiendo el riesgo y quiero continuar sin cifrado", color = Color.White, fontSize = 12.sp)
+                                    }
+                                }
+                            }
+                        }
+
                 // Test & Save buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -980,7 +1003,7 @@ fun SettingsScreen(
                             viewModel.saveSettings(hostInput, portInput, usernameInput, passwordInput, tokenInput, demoInput, accentColorInput)
                             viewModel.testConnection()
                         },
-                        enabled = !isTesting && hostInput.isNotEmpty(),
+                        enabled = !isTesting && hostInput.isNotEmpty() && (!isInsecureConnection || insecureConnectionConfirmed),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A)),
                         modifier = Modifier.weight(1f).testTag("test_connection_button")
                     ) {
@@ -998,6 +1021,7 @@ fun SettingsScreen(
                             showServerSubmenu = false
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = accentColor),
+                        enabled = hostInput.isNotEmpty() && (!isInsecureConnection || insecureConnectionConfirmed),
                         modifier = Modifier.weight(1f).testTag("submit_button")
                     ) {
                         Text(stringResource(R.string.save), color = Color.Black, fontWeight = FontWeight.Bold)
