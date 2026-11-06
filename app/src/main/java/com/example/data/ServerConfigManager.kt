@@ -46,7 +46,6 @@ class ServerConfigManager(context: Context) {
             }
             return secure
         }
-    }
 
         private const val KEY_HOST = "server_host"
         private const val KEY_USERNAME = "server_username"
