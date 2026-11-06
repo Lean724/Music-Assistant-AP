@@ -65,4 +65,13 @@
     <string name="server_status_demo">演示模式已开启</string>
     <string name="server_status_configured">服务器: %1$s</string>
     <string name="server_status_unconfigured">未配置</string>
+    <string name="tab_favorites">收藏</string>
+    <string name="play_all">全部播放</string>
+    <string name="added_to_queue">已添加到队列</string>
+    <string name="no_favorites">暂无收藏</string>
+    <string name="tracks_count">%1$d 首歌曲</string>
+    <string name="albums_count">%1$d 张专辑</string>
+    <string name="artists_title">艺人</string>
+    <string name="albums_title">专辑</string>
+    <string name="top_tracks">热门歌曲</string>
 </resources>

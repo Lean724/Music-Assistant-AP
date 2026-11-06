@@ -331,6 +331,54 @@ class MusicAssistantClient {
         }
     }
 
+    suspend fun getAlbumTracks(host: String, port: String, albumId: String, user: String = "", pass: String = "", token: String = ""): List<Track> {
+        return try {
+            val resolvedToken = resolveToken(host, port, user, pass, token) ?: return emptyList()
+            val args = JSONObject().apply {
+                put("item_id", albumId)
+                put("provider", "library")
+            }
+            val responseString = executeWebSocketCommand(host, port, "music/albums/album_tracks", resolvedToken, args) ?: return emptyList()
+            val cleanJson = getCleanJson(responseString)
+            parseTracks(cleanJson, host, port)
+        } catch (e: Exception) {
+            Log.e("MusicAssistantClient", "Error fetching album tracks: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getPlaylistTracks(host: String, port: String, playlistId: String, user: String = "", pass: String = "", token: String = ""): List<Track> {
+        return try {
+            val resolvedToken = resolveToken(host, port, user, pass, token) ?: return emptyList()
+            val args = JSONObject().apply {
+                put("item_id", playlistId)
+                put("provider", "library")
+            }
+            val responseString = executeWebSocketCommand(host, port, "music/playlists/playlist_tracks", resolvedToken, args) ?: return emptyList()
+            val cleanJson = getCleanJson(responseString)
+            parseTracks(cleanJson, host, port)
+        } catch (e: Exception) {
+            Log.e("MusicAssistantClient", "Error fetching playlist tracks: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getArtistTracks(host: String, port: String, artistId: String, user: String = "", pass: String = "", token: String = ""): List<Track> {
+        return try {
+            val resolvedToken = resolveToken(host, port, user, pass, token) ?: return emptyList()
+            val args = JSONObject().apply {
+                put("item_id", artistId)
+                put("provider", "library")
+            }
+            val responseString = executeWebSocketCommand(host, port, "music/artists/artist_tracks", resolvedToken, args) ?: return emptyList()
+            val cleanJson = getCleanJson(responseString)
+            parseTracks(cleanJson, host, port)
+        } catch (e: Exception) {
+            Log.e("MusicAssistantClient", "Error fetching artist tracks: ${e.message}")
+            emptyList()
+        }
+    }
+
     suspend fun getPlayers(host: String, port: String, user: String, pass: String, token: String): List<Player> {
         return try {
             // If the persistent remote-control session is active, request directly over it (ultra-fast)
@@ -929,9 +977,10 @@ class MusicAssistantClient {
                 val volume = obj.optInt("volume_level", 50)
                 val currentTrackId = obj.optString("current_item_id", null)
                 val isMuted = obj.optBoolean("is_muted", false)
+                val provider = obj.optString("provider", obj.optString("type", ""))
 
                 if (id.isNotEmpty()) {
-                    list.add(Player(id, name, state, volume, currentTrackId, isMuted))
+                    list.add(Player(id, name, state, volume, currentTrackId, isMuted, provider))
                 }
             }
         } catch (e: Exception) {
@@ -1066,6 +1115,7 @@ class MusicAssistantClient {
                 val duration = item.optInt("duration", mediaObj.optInt("duration", 0))
                 val imageUrl = resolveImageUrl(host, port, mediaObj.optJSONObject("metadata")?.optJSONArray("images"))
                 val uri = mediaObj.optString("uri", null)
+                val qId = item.optString("queue_item_id", "").ifEmpty { item.optString("item_id", "") }
 
                 list.add(
                     Track(
@@ -1076,7 +1126,8 @@ class MusicAssistantClient {
                         durationSec = duration,
                         image = imageUrl,
                         streamUrl = null,
-                        uri = uri
+                        uri = uri,
+                        queueItemId = if (qId.isNotEmpty()) qId else null
                     )
                 )
             }

@@ -21,7 +21,8 @@ data class Track(
     val durationSec: Int,
     val image: String? = null,
     val streamUrl: String? = null,
-    val uri: String? = null
+    val uri: String? = null,
+    val queueItemId: String? = null
 ) {
     val durationString: String
         get() {
@@ -44,7 +45,8 @@ data class Player(
     val state: String = "idle", // "playing", "paused", "idle"
     val volume: Int = 50,
     val currentTrackId: String? = null,
-    val isMuted: Boolean = false
+    val isMuted: Boolean = false,
+    val provider: String = ""
 )
 
 data class QueueItem(

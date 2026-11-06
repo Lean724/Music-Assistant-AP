@@ -65,4 +65,13 @@
     <string name="server_status_demo">Demo mode active</string>
     <string name="server_status_configured">Server: %1$s</string>
     <string name="server_status_unconfigured">Not configured</string>
+    <string name="tab_favorites">Favorites</string>
+    <string name="play_all">Play All</string>
+    <string name="added_to_queue">Added to queue</string>
+    <string name="no_favorites">No favorites yet</string>
+    <string name="tracks_count">%1$d tracks</string>
+    <string name="albums_count">%1$d albums</string>
+    <string name="artists_title">Artists</string>
+    <string name="albums_title">Albums</string>
+    <string name="top_tracks">Top Tracks</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.foundation.background
 import androidx.compose.ui.res.stringResource
+import kotlinx.coroutines.launch
 import com.example.ui.screens.*
 import com.example.ui.theme.MyApplicationTheme
 import com.example.viewmodel.MusicViewModel
@@ -44,7 +45,8 @@ class MainActivity : ComponentActivity() {
             val accentColorStr by viewModel.accentColor.collectAsStateWithLifecycle()
 
             MyApplicationTheme(accentColorStr = accentColorStr) {
-                var currentTab by remember { mutableStateOf("library") }
+                val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = 0, pageCount = { 3 })
+                val coroutineScope = rememberCoroutineScope()
                 var showFullPlayer by remember { mutableStateOf(false) }
 
                 val currentAccentColor = MaterialTheme.colorScheme.primary
@@ -72,8 +74,8 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 NavigationRailItem(
-                                    selected = currentTab == "library",
-                                    onClick = { currentTab = "library" },
+                                    selected = pagerState.currentPage == 0,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                                     icon = { Icon(Icons.Default.LibraryMusic, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_library)) },
                                     label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_library)) },
                                     colors = NavigationRailItemDefaults.colors(
@@ -87,8 +89,8 @@ class MainActivity : ComponentActivity() {
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 NavigationRailItem(
-                                    selected = currentTab == "queue",
-                                    onClick = { currentTab = "queue" },
+                                    selected = pagerState.currentPage == 1,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                                     icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
                                     label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
                                     colors = NavigationRailItemDefaults.colors(
@@ -102,8 +104,8 @@ class MainActivity : ComponentActivity() {
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 NavigationRailItem(
-                                    selected = currentTab == "settings",
-                                    onClick = { currentTab = "settings" },
+                                    selected = pagerState.currentPage == 2,
+                                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(2) } },
                                     icon = { Icon(Icons.Default.Settings, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
                                     label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
                                     colors = NavigationRailItemDefaults.colors(
@@ -118,10 +120,15 @@ class MainActivity : ComponentActivity() {
                             }
 
                             Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                                when (currentTab) {
-                                    "library" -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                                    "queue" -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                                    "settings" -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                androidx.compose.foundation.pager.HorizontalPager(
+                                    state = pagerState,
+                                    modifier = Modifier.fillMaxSize()
+                                ) { page ->
+                                    when (page) {
+                                        0 -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                        1 -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                        2 -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                    }
                                 }
 
                                 // Docked Mini Player for tablet
@@ -149,8 +156,8 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
                                 ) {
                                     NavigationBarItem(
-                                        selected = currentTab == "library",
-                                        onClick = { currentTab = "library" },
+                                        selected = pagerState.currentPage == 0,
+                                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                                         icon = { Icon(Icons.Default.LibraryMusic, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_library)) },
                                         label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_library)) },
                                         colors = NavigationBarItemDefaults.colors(
@@ -163,8 +170,8 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier.testTag("library_tab")
                                     )
                                     NavigationBarItem(
-                                        selected = currentTab == "queue",
-                                        onClick = { currentTab = "queue" },
+                                        selected = pagerState.currentPage == 1,
+                                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                                         icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
                                         label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
                                         colors = NavigationBarItemDefaults.colors(
@@ -177,8 +184,8 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier.testTag("queue_tab")
                                     )
                                     NavigationBarItem(
-                                        selected = currentTab == "settings",
-                                        onClick = { currentTab = "settings" },
+                                        selected = pagerState.currentPage == 2,
+                                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(2) } },
                                         icon = { Icon(Icons.Default.Settings, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
                                         label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
                                         colors = NavigationBarItemDefaults.colors(
@@ -199,13 +206,18 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxSize()
                                     .padding(bottom = innerPadding.calculateBottomPadding())
                             ) {
-                                when (currentTab) {
-                                    "library" -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                                    "queue" -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                                    "settings" -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                androidx.compose.foundation.pager.HorizontalPager(
+                                    state = pagerState,
+                                    modifier = Modifier.fillMaxSize()
+                                ) { page ->
+                                    when (page) {
+                                        0 -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                        1 -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                        2 -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                    }
                                 }
 
-                                val miniPlayerBottomPadding = if (currentTab == "library" || currentTab == "queue") 80.dp else 8.dp
+                                val miniPlayerBottomPadding = if (pagerState.currentPage == 0 || pagerState.currentPage == 1) 80.dp else 8.dp
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomCenter)

@@ -12,6 +12,7 @@ import com.example.api.MusicAssistantClient
 import com.example.data.*
 import com.example.playback.LocalPlayerManager
 import com.example.playback.PlaybackNotificationManager
+import com.example.playback.PlaybackService
 import com.example.playback.sendspin.SendspinClient
 import com.example.playback.sendspin.SendspinState
 import kotlinx.coroutines.delay
@@ -32,6 +33,12 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     private val playerManager = LocalPlayerManager(context)
     private val notificationManager = PlaybackNotificationManager(context)
     private val sendspinClient = SendspinClient()
+
+    // Favorites state
+    val favoriteTrackIds = MutableStateFlow(configManager.favoriteTrackIds)
+    val favoriteAlbumIds = MutableStateFlow(configManager.favoriteAlbumIds)
+    val favoriteArtistIds = MutableStateFlow(configManager.favoriteArtistIds)
+    val favoritePlaylistIds = MutableStateFlow(configManager.favoritePlaylistIds)
 
     private val playbackReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
@@ -264,15 +271,17 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             context.registerReceiver(playbackReceiver, filter)
         }
 
-        // Collect current track and playback state to keep the notification updated
+        // Collect current track and playback state to keep the notification and foreground service updated
         viewModelScope.launch {
             combine(currentTrack, isPlaying) { track, playing ->
                 track to playing
             }.collect { (track, playing) ->
                 if (track != null) {
                     notificationManager.showNotification(track, playing)
+                    PlaybackService.startService(context, track, playing)
                 } else {
                     notificationManager.cancelNotification()
+                    PlaybackService.stopService(context)
                 }
             }
         }
@@ -356,7 +365,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getLocalDevicePlayer(): Player {
         val name = localPlayerName.value.trim().ifEmpty {
-            "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim().ifEmpty { "Dispositivo" }
+            "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim().ifEmpty { "Dispositivo Local" }
         }
         return Player(
             id = "local_phone",
@@ -368,28 +377,33 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     fun isThisDevice(player: Player): Boolean {
         if (player.id == "local_phone") return true
+        if (player.provider.equals("sendspin", ignoreCase = true)) return true
+        if (player.id.startsWith("sendspin", ignoreCase = true) || player.id.contains("sendspin", ignoreCase = true)) return true
         val clientId = configManager.sendspinClientId
-        if (player.id.contains(clientId, ignoreCase = true)) return true
+        if (clientId.isNotEmpty() && player.id.contains(clientId, ignoreCase = true)) return true
         val currentLocalName = localPlayerName.value.trim()
-        return currentLocalName.isNotEmpty() && player.name.equals(currentLocalName, ignoreCase = true)
+        if (currentLocalName.isNotEmpty() && player.name.equals(currentLocalName, ignoreCase = true)) return true
+        return false
     }
 
     private fun mergePlayersWithLocalDevice(serverPlayers: List<Player>): List<Player> {
         val currentLocalName = localPlayerName.value.trim()
-        val clientId = configManager.sendspinClientId
-
-        // Find if server has registered this device as a player (Sendspin)
-        val serverThisDevice = serverPlayers.firstOrNull { p ->
-            p.id.contains(clientId, ignoreCase = true) ||
-            (p.name.equals(currentLocalName, ignoreCase = true) && p.id.contains("sendspin", ignoreCase = true)) ||
-            (currentLocalName.isNotEmpty() && p.name.equals(currentLocalName, ignoreCase = true))
+        val defaultName = currentLocalName.ifEmpty {
+            "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim().ifEmpty { "Dispositivo Local" }
         }
 
+        // Find if server has registered this device as a player (Sendspin)
+        val serverThisDevice = serverPlayers.firstOrNull { isThisDevice(it) }
+
         return if (serverThisDevice != null) {
-            val others = serverPlayers.filter { it.id != serverThisDevice.id }
-            listOf(serverThisDevice) + others
+            val unifiedLocal = serverThisDevice.copy(
+                name = if (serverThisDevice.name.isBlank()) defaultName else serverThisDevice.name
+            )
+            val others = serverPlayers.filter { !isThisDevice(it) && it.id != "local_phone" }
+            listOf(unifiedLocal) + others
         } else {
-            listOf(getLocalDevicePlayer()) + serverPlayers
+            val others = serverPlayers.filter { it.id != "local_phone" && !isThisDevice(it) }
+            listOf(getLocalDevicePlayer()) + others
         }
     }
 
@@ -596,13 +610,20 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
 
     // Playback control
     fun playTrack(track: Track) {
-        if (_isRemoteSession.value) {
-            val queueId = _activePlayer.value?.id ?: return
+        val active = _activePlayer.value
+        val effectiveRemote = _isRemoteSession.value || (active != null && !useDemoMode.value && client.isSessionConnected)
+        val targetQueueId = if (active != null && isThisDevice(active) && active.id == "local_phone") {
+            _availablePlayers.value.firstOrNull { it.id != "local_phone" && isThisDevice(it) }?.id ?: active.id
+        } else {
+            active?.id
+        }
+
+        if (effectiveRemote && targetQueueId != null && targetQueueId != "local_phone") {
             val mediaUri = track.uri ?: "library://track/${track.id}"
             viewModelScope.launch {
                 try {
                     client.sendSessionCommand("player_queues/play_media", JSONObject().apply {
-                        put("queue_id", queueId)
+                        put("queue_id", targetQueueId)
                         put("media", org.json.JSONArray().put(mediaUri))
                         put("option", "play")
                     })
@@ -873,13 +894,19 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun removeFromQueue(track: Track) {
+        val targetItemId = track.queueItemId ?: track.id
+        // Optimistically remove from queue immediately
+        _queue.value = _queue.value.filter { 
+            (it.queueItemId == null || it.queueItemId != track.queueItemId) && it.id != track.id 
+        }
+
         if (_isRemoteSession.value) {
             val queueId = _activePlayer.value?.id ?: return
             viewModelScope.launch {
                 try {
                     client.sendSessionCommand("player_queues/delete_item", JSONObject().apply {
                         put("queue_id", queueId)
-                        put("item_id_or_index", track.id)
+                        put("item_id_or_index", targetItemId)
                     })
                     fetchRemoteQueue()
                 } catch (e: Exception) {
@@ -910,6 +937,17 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearQueue() {
+        _currentTrack.value = null
+        _isPlaying.value = false
+        _currentPositionSec.value = 0
+        _durationSec.value = 0
+        _queue.value = emptyList()
+        currentQueueIndex = -1
+        playerManager.stop()
+        notificationManager.cancelNotification()
+        PlaybackService.stopService(context)
+        updateActivePlayerState("idle", null)
+
         if (_isRemoteSession.value) {
             val queueId = _activePlayer.value?.id ?: return
             viewModelScope.launch {
@@ -917,18 +955,111 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     client.sendSessionCommand("player_queues/clear", JSONObject().apply {
                         put("queue_id", queueId)
                     })
+                    client.queueStop(queueId)
                     fetchRemoteQueue()
                 } catch (e: Exception) {
                     Log.e("MusicViewModel", "Error clearing remote queue: ${e.message}")
                 }
             }
+        }
+    }
+
+    // Favorites toggles
+    fun toggleFavoriteTrack(trackId: String) {
+        val current = favoriteTrackIds.value.toMutableSet()
+        if (current.contains(trackId)) current.remove(trackId) else current.add(trackId)
+        favoriteTrackIds.value = current
+        configManager.favoriteTrackIds = current
+    }
+
+    fun toggleFavoriteAlbum(albumId: String) {
+        val current = favoriteAlbumIds.value.toMutableSet()
+        if (current.contains(albumId)) current.remove(albumId) else current.add(albumId)
+        favoriteAlbumIds.value = current
+        configManager.favoriteAlbumIds = current
+    }
+
+    fun toggleFavoriteArtist(artistId: String) {
+        val current = favoriteArtistIds.value.toMutableSet()
+        if (current.contains(artistId)) current.remove(artistId) else current.add(artistId)
+        favoriteArtistIds.value = current
+        configManager.favoriteArtistIds = current
+    }
+
+    fun toggleFavoritePlaylist(playlistId: String) {
+        val current = favoritePlaylistIds.value.toMutableSet()
+        if (current.contains(playlistId)) current.remove(playlistId) else current.add(playlistId)
+        favoritePlaylistIds.value = current
+        configManager.favoritePlaylistIds = current
+    }
+
+    // Collection helpers (Albums, Artists, Playlists)
+    suspend fun getTracksForArtist(artist: Artist): List<Track> {
+        if (!useDemoMode.value && token.value.isNotEmpty()) {
+            val serverTracks = client.getArtistTracks(host.value, port.value, artist.id, token.value)
+            if (serverTracks.isNotEmpty()) return serverTracks
+        }
+        return _tracks.value.filter { it.artist.contains(artist.name, ignoreCase = true) }
+    }
+
+    fun getAlbumsForArtist(artist: Artist): List<Album> {
+        return _albums.value.filter { it.artist.contains(artist.name, ignoreCase = true) }
+    }
+
+    suspend fun getTracksForAlbum(album: Album): List<Track> {
+        if (!useDemoMode.value && token.value.isNotEmpty()) {
+            val serverTracks = client.getAlbumTracks(host.value, port.value, album.id, token.value)
+            if (serverTracks.isNotEmpty()) return serverTracks
+        }
+        return _tracks.value.filter { it.album.contains(album.name, ignoreCase = true) || it.artist.contains(album.artist, ignoreCase = true) }
+    }
+
+    suspend fun getTracksForPlaylist(playlist: Playlist): List<Track> {
+        if (!useDemoMode.value && token.value.isNotEmpty()) {
+            val serverTracks = client.getPlaylistTracks(host.value, port.value, playlist.id, token.value)
+            if (serverTracks.isNotEmpty()) return serverTracks
+        }
+        return _tracks.value.take(playlist.trackCount.coerceAtLeast(1))
+    }
+
+    fun playTracks(tracksToPlay: List<Track>) {
+        if (tracksToPlay.isEmpty()) return
+        playTrack(tracksToPlay.first())
+        val remaining = tracksToPlay.drop(1)
+        if (remaining.isNotEmpty()) {
+            addTracksToQueue(remaining)
+        }
+    }
+
+    fun addTracksToQueue(tracksToAdd: List<Track>) {
+        if (tracksToAdd.isEmpty()) return
+        if (_isRemoteSession.value) {
+            val queueId = _activePlayer.value?.id ?: return
+            val jsonArray = org.json.JSONArray()
+            tracksToAdd.forEach { t ->
+                jsonArray.put(t.uri ?: "library://track/${t.id}")
+            }
+            viewModelScope.launch {
+                try {
+                    client.sendSessionCommand("player_queues/play_media", JSONObject().apply {
+                        put("queue_id", queueId)
+                        put("media", jsonArray)
+                        put("option", "add")
+                    })
+                    fetchRemoteQueue()
+                } catch (e: Exception) {
+                    Log.e("MusicViewModel", "Error adding tracks to remote queue: ${e.message}")
+                }
+            }
             return
         }
-        playerManager.stop()
-        _currentTrack.value = null
-        _queue.value = emptyList()
-        currentQueueIndex = -1
-        updateActivePlayerState("idle", null)
+        val currentQueue = _queue.value.toMutableList()
+        tracksToAdd.forEach { t ->
+            if (!currentQueue.any { it.id == t.id }) {
+                currentQueue.add(t)
+            }
+        }
+        _queue.value = currentQueue
     }
 
     private fun updateActivePlayerState(state: String, trackId: String?) {

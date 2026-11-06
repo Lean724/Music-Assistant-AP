@@ -61,7 +61,7 @@ class PlaybackNotificationManager(private val context: Context) {
         }
     }
 
-    fun showNotification(track: Track, isPlaying: Boolean) {
+    fun buildNotification(track: Track, isPlaying: Boolean): android.app.Notification {
         val openIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -148,7 +148,12 @@ class PlaybackNotificationManager(private val context: Context) {
                     .setMediaSession(mediaSession.sessionToken)
             )
 
-        notificationManager.notify(NOTIFICATION_ID, builder.build())
+        return builder.build()
+    }
+
+    fun showNotification(track: Track, isPlaying: Boolean) {
+        val notification = buildNotification(track, isPlaying)
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     fun cancelNotification() {

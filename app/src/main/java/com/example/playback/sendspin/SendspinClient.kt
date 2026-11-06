@@ -90,6 +90,12 @@ class SendspinClient {
     val muted: StateFlow<Boolean> = _muted
 
     private var staticDelayMs = 0
+    private var lastHost = ""
+    private var lastSendspinPort = ""
+    private var lastClientId = ""
+    private var lastPlayerName = ""
+    private var shouldAutoReconnect = false
+    private var autoReconnectJob: Job? = null
 
     // --- Audio output state ---
     private var audioTrack: AudioTrack? = null
@@ -112,7 +118,14 @@ class SendspinClient {
     fun connect(host: String, sendspinPort: String, clientId: String, playerName: String, delayMs: Int = 0) {
         disconnect("restart") // clean up any prior connection first
 
+        lastHost = host
+        lastSendspinPort = sendspinPort
+        lastClientId = clientId
+        lastPlayerName = playerName
         staticDelayMs = delayMs
+        shouldAutoReconnect = true
+        autoReconnectJob?.cancel()
+
         val configuredHost = host.trim()
         val useTls = configuredHost.startsWith("https://", ignoreCase = true)
         val cleanHost = configuredHost.removePrefix("http://").removePrefix("https://").substringBefore("/").substringBefore(":")
@@ -147,19 +160,40 @@ class SendspinClient {
                 Log.e("Sendspin", "WebSocket failure: ${t.message}")
                 _state.value = SendspinState.Error(t.localizedMessage ?: "Conexión perdida")
                 teardownAudio()
+                scheduleReconnect()
             }
 
             override fun onClosed(ws: WebSocket, code: Int, reason: String) {
                 Log.d("Sendspin", "WebSocket closed: $reason")
                 if (_state.value !is SendspinState.Error) _state.value = SendspinState.Disconnected
                 teardownAudio()
+                if (code != 1000) {
+                    scheduleReconnect()
+                }
             }
         })
 
         startFeederThread()
     }
 
+    private fun scheduleReconnect() {
+        if (!shouldAutoReconnect || lastHost.isEmpty()) return
+        autoReconnectJob?.cancel()
+        autoReconnectJob = scope.launch {
+            delay(3000)
+            if (shouldAutoReconnect && webSocket == null) {
+                Log.i("Sendspin", "Attempting automatic Sendspin reconnection...")
+                connect(lastHost, lastSendspinPort, lastClientId, lastPlayerName, staticDelayMs)
+            }
+        }
+    }
+
     fun disconnect(reason: String = "user_request") {
+        if (reason == "user_request" || reason == "shutdown") {
+            shouldAutoReconnect = false
+            autoReconnectJob?.cancel()
+            autoReconnectJob = null
+        }
         running.set(false)
         timeSyncJob?.cancel()
         timeSyncJob = null

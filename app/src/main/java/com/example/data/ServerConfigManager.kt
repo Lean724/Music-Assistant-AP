@@ -64,6 +64,10 @@ class ServerConfigManager(context: Context) {
         private const val KEY_LOCAL_PLAYER_NAME = "local_player_name"
         private const val KEY_SENDSPIN_PORT = "sendspin_port"
         private const val KEY_SENDSPIN_DELAY_MS = "sendspin_delay_ms"
+        private const val KEY_FAVORITE_TRACKS = "fav_tracks"
+        private const val KEY_FAVORITE_ALBUMS = "fav_albums"
+        private const val KEY_FAVORITE_ARTISTS = "fav_artists"
+        private const val KEY_FAVORITE_PLAYLISTS = "fav_playlists"
     }
 
     var host: String
@@ -124,6 +128,22 @@ class ServerConfigManager(context: Context) {
     var sendspinDelayMs: Int
         get() = prefs.getInt(KEY_SENDSPIN_DELAY_MS, 0)
         set(value) = prefs.edit().putInt(KEY_SENDSPIN_DELAY_MS, value).apply()
+
+    var favoriteTrackIds: Set<String>
+        get() = prefs.getStringSet(KEY_FAVORITE_TRACKS, emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet(KEY_FAVORITE_TRACKS, value).apply()
+
+    var favoriteAlbumIds: Set<String>
+        get() = prefs.getStringSet(KEY_FAVORITE_ALBUMS, emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet(KEY_FAVORITE_ALBUMS, value).apply()
+
+    var favoriteArtistIds: Set<String>
+        get() = prefs.getStringSet(KEY_FAVORITE_ARTISTS, emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet(KEY_FAVORITE_ARTISTS, value).apply()
+
+    var favoritePlaylistIds: Set<String>
+        get() = prefs.getStringSet(KEY_FAVORITE_PLAYLISTS, emptySet()) ?: emptySet()
+        set(value) = prefs.edit().putStringSet(KEY_FAVORITE_PLAYLISTS, value).apply()
 
     fun clear() {
         prefs.edit().clear().apply()
