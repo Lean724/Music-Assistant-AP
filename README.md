@@ -80,3 +80,7 @@ Este proyecto se apoya en el trabajo, especificaciones e iniciativas de la comun
 ## 📄 Licencia
 
 Este proyecto se distribuye como software libre para la comunidad de usuarios de Music Assistant. Consulta el archivo de licencia correspondiente para más detalles.
+
+## Privacy policy
+
+MMAC's privacy policy is available in [English and Spanish](https://lean724.github.io/Music-Assistant-AP/privacy-policy.html). The page is also linked from the app's Settings screen.

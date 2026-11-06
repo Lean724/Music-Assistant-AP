@@ -43,10 +43,13 @@ class ServerConfigManager(context: Context) {
                 if (editor.commit()) {
                     legacy.edit().clear().commit()
                 }
+            } else if (secure.all.isNotEmpty() && legacy.all.isNotEmpty()) {
+                // A previous migration may have committed encrypted data but failed
+                // while clearing the old file. Remove that obsolete plaintext copy.
+                legacy.edit().clear().commit()
             }
             return secure
         }
-    }
 
         private const val KEY_HOST = "server_host"
         private const val KEY_USERNAME = "server_username"

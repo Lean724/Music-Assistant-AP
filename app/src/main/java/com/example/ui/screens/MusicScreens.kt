@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -773,6 +774,7 @@ fun SettingsScreen(
     viewModel: MusicViewModel,
     modifier: Modifier = Modifier
 ) {
+    val uriHandler = LocalUriHandler.current
     val currentHost by viewModel.host.collectAsStateWithLifecycle()
     val currentPort by viewModel.port.collectAsStateWithLifecycle()
     val currentUsername by viewModel.username.collectAsStateWithLifecycle()
@@ -1412,6 +1414,14 @@ fun SettingsScreen(
                         color = Color.LightGray,
                         fontSize = 12.sp,
                         lineHeight = 16.sp
+                    )
+                    Text(
+                        text = "Política de privacidad / Privacy policy",
+                        color = accentColor,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 10.dp).clickable {
+                            uriHandler.openUri("https://lean724.github.io/Music-Assistant-AP/privacy-policy.html")
+                        }
                     )
 
                     HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 12.dp))

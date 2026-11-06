@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Política de privacidad de MMAC: Minimal Music Assistant Companion.">
+  <title>Política de privacidad — MMAC</title>
+  <style>
+    body{font:16px/1.65 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:850px;margin:0 auto;padding:32px 20px;color:#202124}
+    h1,h2{line-height:1.25} h1{margin-bottom:.25rem} .muted{color:#5f6368}
+    a{color:#145dbf} section{margin:2rem 0} hr{border:0;border-top:1px solid #ddd;margin:2rem 0}
+  </style>
+</head>
+<body>
+  <h1>Política de privacidad</h1>
+  <p class="muted">MMAC: Minimal Music Assistant Companion · Última actualización: 6 de noviembre de 2026</p>
+  <p>Esta política describe cómo MMAC (la «Aplicación») trata la información cuando utilizás la aplicación Android. MMAC es un cliente independiente y no oficial para servidores Music Assistant.</p>
+
+  <section>
+    <h2>1. Quién es responsable y contacto</h2>
+    <p>El desarrollador y responsable de esta aplicación es el mantenedor independiente del proyecto. Para consultas sobre privacidad o seguridad, escribí a <a href="mailto:division707@outlook.com">division707@outlook.com</a>.</p>
+    <p>Proyecto y código fuente: <a href="https://github.com/Lean724/Music-Assistant-AP">github.com/Lean724/Music-Assistant-AP</a>.</p>
+  </section>
+
+  <section>
+    <h2>2. Información que utiliza la aplicación</h2>
+    <ul>
+      <li><strong>Configuración y autenticación:</strong> dirección del servidor, puerto, nombre de usuario, contraseña o token de acceso que ingresás.</li>
+      <li><strong>Identificador del reproductor:</strong> MMAC genera y conserva un identificador aleatorio persistente para registrar este dispositivo como reproductor Sendspin.</li>
+      <li><strong>Información técnica del dispositivo:</strong> modelo y fabricante, nombre que elijas para el reproductor, versión declarada de software y capacidades de audio necesarias para el protocolo Sendspin.</li>
+      <li><strong>Información musical y de reproducción:</strong> la aplicación consulta al servidor Music Assistant los elementos de biblioteca, metadatos, listas, reproductores, colas y estados necesarios para mostrar y controlar la reproducción.</li>
+      <li><strong>Preferencias:</strong> ajustes de interfaz, reproductor y conexión.</li>
+    </ul>
+    <p>MMAC no requiere que crees una cuenta de MMAC y no solicita permisos de ubicación, contactos, cámara ni micrófono.</p>
+  </section>
+
+  <section>
+    <h2>3. Cómo se transmiten los datos</h2>
+    <p>La información de conexión, autenticación, biblioteca y control se transmite directamente entre la aplicación y el servidor Music Assistant que configurás. El desarrollador de MMAC no opera un servidor intermediario y, según el diseño actual de la aplicación, no recibe esas credenciales ni tu historial musical.</p>
+    <p>Cuando habilitás el reproductor local, MMAC también envía al servidor Music Assistant el identificador Sendspin, el nombre del reproductor, datos técnicos del dispositivo y capacidades de audio para registrarlo y sincronizar la reproducción.</p>
+    <p>La aplicación puede solicitar imágenes y recursos multimedia a los proveedores o servicios indicados por el contenido o el modo de demostración. Esas conexiones externas pueden recibir la dirección IP y los datos técnicos habituales de una solicitud de red. El tratamiento que hagan esos proveedores se rige por sus propias políticas.</p>
+  </section>
+
+  <section>
+    <h2>4. Conexiones cifradas y no cifradas</h2>
+    <p>Se recomienda configurar el servidor con HTTPS/WSS. La aplicación también permite conexiones HTTP/WS sin cifrado para instalaciones locales que no tengan TLS. Antes de probar o guardar una conexión sin cifrado, la aplicación muestra una advertencia y requiere confirmación.</p>
+    <p>Una conexión HTTP/WS no protege el tráfico: otras personas con capacidad de observar la red podrían interceptar credenciales, tokens y datos intercambiados. La confirmación no elimina ese riesgo. Para servidores accesibles desde Internet, utilizá HTTPS/WSS.</p>
+  </section>
+
+  <section>
+    <h2>5. Almacenamiento y seguridad</h2>
+    <p>La configuración y los secretos de conexión se guardan localmente en preferencias cifradas mediante claves protegidas por Android Keystore. En la primera ejecución de la versión que incorpora esta protección, la configuración anterior se migra al almacenamiento cifrado y se elimina la copia anterior si la migración se completa correctamente.</p>
+    <p>La aplicación deshabilita la copia de seguridad de Android y excluye las preferencias del respaldo y la transferencia entre dispositivos. Ningún mecanismo puede garantizar seguridad absoluta; protegé también el acceso físico y lógico a tu dispositivo y al servidor Music Assistant.</p>
+  </section>
+
+  <section>
+    <h2>6. Firebase, analítica y publicidad</h2>
+    <p>La versión del código fuente asociada a esta política no integra Firebase, servicios de analítica ni SDKs publicitarios. MMAC no muestra anuncios ni transmite datos a un servicio de analítica operado por el desarrollador.</p>
+  </section>
+
+  <section>
+    <h2>7. Conservación y eliminación</h2>
+    <p>La configuración se conserva en el dispositivo hasta que la elimines desde la aplicación, borres los datos de MMAC o desinstales la aplicación. Al borrar los datos o desinstalar, se elimina el almacenamiento local administrado por Android. Para borrar datos que ya hayan llegado a tu servidor Music Assistant, utilizá las herramientas de ese servidor o contactá a su administrador.</p>
+    <p>El identificador Sendspin permanece en el dispositivo mientras mantengas la configuración local; el servidor puede conservar registros propios conforme a su configuración.</p>
+  </section>
+
+  <section>
+    <h2>8. Menores</h2>
+    <p>MMAC es una herramienta general de control multimedia y no está diseñada específicamente para recopilar información de menores.</p>
+  </section>
+
+  <section>
+    <h2>9. Cambios a esta política</h2>
+    <p>Esta política puede actualizarse cuando cambien las funciones, dependencias o prácticas de tratamiento de datos. La fecha de actualización se indicará al comienzo de esta página.</p>
+  </section>
+
+  <hr>
+  <h1 lang="en">Privacy Policy</h1>
+  <p class="muted">MMAC: Minimal Music Assistant Companion · Last updated: November 6, 2026</p>
+  <p>This policy explains how the MMAC Android application handles information. MMAC is an independent, unofficial client for Music Assistant servers.</p>
+  <section lang="en">
+    <h2>1. Contact</h2>
+    <p>For privacy or security questions, contact the independent project maintainer at <a href="mailto:division707@outlook.com">division707@outlook.com</a>. Source code: <a href="https://github.com/Lean724/Music-Assistant-AP">GitHub repository</a>.</p>
+    <h2>2. Information used</h2>
+    <p>The app uses the server address and port, username, password or access token you provide; a persistent random Sendspin player identifier; device manufacturer/model and audio capabilities; music-library metadata, player and queue state obtained from your Music Assistant server; and your app preferences. MMAC does not require an MMAC account and does not request location, contacts, camera or microphone permissions.</p>
+    <h2>3. Data transmission</h2>
+    <p>Connection, authentication, library and playback-control data are sent directly between the app and the Music Assistant server you configure. The developer does not operate an intermediary server and, by the app's current design, does not receive your credentials or music history. When local playback is enabled, device/player information and audio capabilities are sent to that server for Sendspin registration and synchronization.</p>
+    <p>The app may request images or media from services referenced by content or used in demo mode. Such services may receive your IP address and ordinary network-request information; their own privacy policies apply.</p>
+    <h2>4. Unencrypted connections</h2>
+    <p>HTTPS/WSS is recommended. HTTP/WS is also supported for local installations without TLS, after an in-app warning and explicit confirmation. Unencrypted traffic can expose credentials, tokens and exchanged data to parties able to monitor the network. Confirmation does not remove this risk. Use HTTPS/WSS for servers reachable over the Internet.</p>
+    <h2>5. Storage and security</h2>
+    <p>Connection settings and secrets are stored locally in encrypted preferences using keys protected by Android Keystore. On first launch of the version introducing this protection, legacy settings are migrated to encrypted storage and the old copy is deleted if migration succeeds. Android backup is disabled and preferences are excluded from backup and device transfer. No method guarantees absolute security.</p>
+    <h2>6. Firebase, analytics and advertising</h2>
+    <p>The source version associated with this policy does not integrate Firebase, analytics services or advertising SDKs. MMAC does not show ads or send data to developer-operated analytics.</p>
+    <h2>7. Retention and deletion</h2>
+    <p>Settings remain on your device until you clear MMAC's app data or uninstall the app. Data stored on your Music Assistant server must be deleted using that server or by contacting its administrator. The server may retain its own logs according to its configuration.</p>
+    <h2>8. Changes</h2>
+    <p>This policy may be updated when the app's features, dependencies or data practices change. The latest update date appears at the top.</p>
+  </section>
+</body>
+</html>
