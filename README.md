@@ -12,6 +12,18 @@ Una aplicación complementaria, simplificada y básica para conectar con tu serv
 
 ---
 
+## 🧪 Programa de pruebas beta
+
+¿Querés ayudar a mejorar MAC (Music Assistant Companion) antes de su lanzamiento público? Estamos buscando usuarios de Android, especialmente de Home Assistant y Music Assistant, que quieran probar la aplicación y compartir sus comentarios.
+
+**[👉 Inscribirme como beta tester](https://docs.google.com/forms/d/e/1FAIpQLSdBqoAtRJeElqAxpSvexHdzQq99gBtWXDuLgyDVnPnFc_W9Hw/viewform?usp=publish-editor)**
+
+Encontrarás los requisitos, el proceso de incorporación y las instrucciones para participar en la página [Programa de pruebas beta](BETA_TESTING.md).
+
+> Importante: completar el formulario expresa tu interés, pero no te incorpora automáticamente a la prueba cerrada de Google Play. Si tu solicitud es seleccionada, recibirás instrucciones para unirte mediante Google Play. Para cumplir los requisitos de Google Play, deberás aceptar la invitación y permanecer inscrito durante el período indicado.
+
+---
+
 ## 🎵 Características Principales
 
 - **Conexión Directa con Music Assistant**:
