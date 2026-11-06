@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -766,6 +767,7 @@ fun SettingsScreen(
     val isLocalPlayerEnabled by viewModel.localPlayerEnabled.collectAsStateWithLifecycle()
     val currentLocalPlayerName by viewModel.localPlayerName.collectAsStateWithLifecycle()
     val currentSendspinPort by viewModel.sendspinPort.collectAsStateWithLifecycle()
+    val currentSendspinDelay by viewModel.sendspinDelayMs.collectAsStateWithLifecycle()
     val sendspinState by viewModel.sendspinState.collectAsStateWithLifecycle()
     
     val isTesting by viewModel.isTestingConnection.collectAsStateWithLifecycle()
@@ -780,8 +782,13 @@ fun SettingsScreen(
     var accentColorInput by remember(currentAccentColorStr) { mutableStateOf(currentAccentColorStr) }
     var localPlayerNameInput by remember(currentLocalPlayerName) { mutableStateOf(currentLocalPlayerName) }
     var sendspinPortInput by remember(currentSendspinPort) { mutableStateOf(currentSendspinPort) }
+    var sendspinDelayInput by remember(currentSendspinDelay) { mutableStateOf(currentSendspinDelay) }
 
     var showServerSubmenu by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = showServerSubmenu) {
+        showServerSubmenu = false
+    }
 
     val accentColor = remember(accentColorInput) {
         try {
@@ -1235,8 +1242,73 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                         )
 
+                        // Speaker Delay Compensation (retardo de altavoz)
+                        Text("Compensación de retardo (Speaker Delay)", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 2.dp))
+                        Text(
+                            "Ajusta la latencia (en ms) para alinear el audio de este teléfono con otros altavoces o compensar el retraso de auriculares Bluetooth.",
+                            color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.padding(bottom = 6.dp)
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                            Slider(
+                                value = sendspinDelayInput.toFloat(),
+                                onValueChange = {
+                                    sendspinDelayInput = it.toInt()
+                                    viewModel.setSendspinDelay(sendspinDelayInput)
+                                },
+                                valueRange = -100f..500f,
+                                steps = 11,
+                                modifier = Modifier.weight(1f),
+                                colors = SliderDefaults.colors(
+                                    thumbColor = accentColor,
+                                    activeTrackColor = accentColor,
+                                    inactiveTrackColor = Color(0xFF333333)
+                                )
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${sendspinDelayInput} ms",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.width(55.dp),
+                                textAlign = TextAlign.End
+                            )
+                        }
+
+                        // Presets
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            listOf(0 to "0 ms (Directo)", 150 to "150 ms", 300 to "300 ms (BT)").forEach { (ms, label) ->
+                                val isSelected = sendspinDelayInput == ms
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(if (isSelected) accentColor.copy(alpha = 0.2f) else Color(0xFF2A2A2A))
+                                        .border(
+                                            width = 1.dp,
+                                            color = if (isSelected) accentColor else Color.Transparent,
+                                            shape = RoundedCornerShape(6.dp)
+                                        )
+                                        .clickable {
+                                            sendspinDelayInput = ms
+                                            viewModel.setSendspinDelay(ms)
+                                        }
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = label,
+                                        fontSize = 11.sp,
+                                        color = if (isSelected) accentColor else Color.LightGray,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                    )
+                                }
+                            }
+                        }
+
                         Button(
-                            onClick = { viewModel.setLocalPlayerConfig(true, localPlayerNameInput, sendspinPortInput) },
+                            onClick = { viewModel.setLocalPlayerConfig(true, localPlayerNameInput, sendspinPortInput, sendspinDelayInput) },
                             colors = ButtonDefaults.buttonColors(containerColor = accentColor),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -1249,6 +1321,69 @@ fun SettingsScreen(
                             modifier = Modifier.padding(top = 10.dp)
                         )
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 4. About & Attributions Card
+            Card(
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Información",
+                            tint = accentColor,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "MMAC: Minimal Music Assistant Companion",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Versión 1.2 • Cliente ligero independiente",
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "MMAC es una aplicación simplificada y básica para conectar con tu servidor de Music Assistant y reproducir tu música. No es una versión oficial y es desarrollada y mantenida actualmente por una única persona.",
+                        color = Color.LightGray,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 12.dp))
+
+                    Text(
+                        text = "Atribuciones y Reconocimientos:",
+                        color = accentColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+
+                    Text(
+                        text = "• Music Assistant: Servidor multimedia y orquestador creado originalmente por Marcel van der Veldt y la comunidad de Music Assistant (music-assistant.io).\n• Protocolo Sendspin: Especificación abierta de streaming sincronizado multi-habitación (sendspin-audio.com / Open Home Foundation).\n• Music Assistant Mobile App: Aplicación oficial de referencia (github.com/music-assistant/mobile-app).",
+                        color = Color.Gray,
+                        fontSize = 11.sp,
+                        lineHeight = 15.sp
+                    )
                 }
             }
         }

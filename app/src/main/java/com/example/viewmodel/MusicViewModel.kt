@@ -62,6 +62,7 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     val localPlayerEnabled = MutableStateFlow(configManager.localPlayerEnabled)
     val localPlayerName = MutableStateFlow(configManager.localPlayerName)
     val sendspinPort = MutableStateFlow(configManager.sendspinPort)
+    val sendspinDelayMs = MutableStateFlow(configManager.sendspinDelayMs)
     val sendspinState: StateFlow<SendspinState> = sendspinClient.state
     
     private val _isTestingConnection = MutableStateFlow(false)
@@ -696,14 +697,23 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
      * on, selecting it and controlling playback works through the exact same remote-session code
      * (play/pause/volume/queue) used for every other player.
      */
-    fun setLocalPlayerConfig(enabled: Boolean, name: String, sendspinPortValue: String) {
+    fun setLocalPlayerConfig(enabled: Boolean, name: String, sendspinPortValue: String, delayMs: Int = sendspinDelayMs.value) {
         configManager.localPlayerEnabled = enabled
         configManager.localPlayerName = name
         configManager.sendspinPort = sendspinPortValue
+        configManager.sendspinDelayMs = delayMs
         localPlayerEnabled.value = enabled
         localPlayerName.value = name
         sendspinPort.value = sendspinPortValue
+        sendspinDelayMs.value = delayMs
         syncLocalPlayerConnection()
+    }
+
+    /** Dynamically updates speaker delay compensation (latency offset in milliseconds). */
+    fun setSendspinDelay(delayMs: Int) {
+        configManager.sendspinDelayMs = delayMs
+        sendspinDelayMs.value = delayMs
+        sendspinClient.setStaticDelay(delayMs)
     }
 
     /** Connects or disconnects the Sendspin client to match current settings. */
@@ -713,7 +723,13 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         if (localPlayerEnabled.value) {
-            sendspinClient.connect(host.value, sendspinPort.value, configManager.sendspinClientId, localPlayerName.value)
+            sendspinClient.connect(
+                host = host.value,
+                sendspinPort = sendspinPort.value,
+                clientId = configManager.sendspinClientId,
+                playerName = localPlayerName.value,
+                delayMs = sendspinDelayMs.value
+            )
         } else {
             sendspinClient.disconnect("user_request")
         }

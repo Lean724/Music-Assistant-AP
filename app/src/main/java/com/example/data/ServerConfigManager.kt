@@ -19,6 +19,7 @@ class ServerConfigManager(context: Context) {
         private const val KEY_LOCAL_PLAYER_ENABLED = "local_player_enabled"
         private const val KEY_LOCAL_PLAYER_NAME = "local_player_name"
         private const val KEY_SENDSPIN_PORT = "sendspin_port"
+        private const val KEY_SENDSPIN_DELAY_MS = "sendspin_delay_ms"
     }
 
     var host: String
@@ -75,6 +76,10 @@ class ServerConfigManager(context: Context) {
     var sendspinPort: String
         get() = prefs.getString(KEY_SENDSPIN_PORT, "8927") ?: "8927"
         set(value) = prefs.edit().putString(KEY_SENDSPIN_PORT, value.trim()).apply()
+
+    var sendspinDelayMs: Int
+        get() = prefs.getInt(KEY_SENDSPIN_DELAY_MS, 0)
+        set(value) = prefs.edit().putInt(KEY_SENDSPIN_DELAY_MS, value).apply()
 
     fun clear() {
         prefs.edit().clear().apply()

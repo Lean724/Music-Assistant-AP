@@ -1,6 +1,6 @@
 {
-  "name": "Music Assistant",
-  "description": "Una aplicación elegante y limpia para gestionar y reproducir música desde tu servidor de Music Assistant al estilo Spotify.",
+  "name": "MMAC: Minimal Music Assistant Companion",
+  "description": "App simplificada y básica para conectar con un servidor Music Assistant y reproducir música. No es una versión oficial; es un proyecto independiente desarrollado y mantenido por una única persona.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

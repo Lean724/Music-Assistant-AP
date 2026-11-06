@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "My Application"
+rootProject.name = "MMAC - Minimal Music Assistant Companion"
 
 include(":app")

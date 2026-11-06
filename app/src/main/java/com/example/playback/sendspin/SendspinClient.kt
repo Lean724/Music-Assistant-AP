@@ -107,11 +107,12 @@ class SendspinClient {
     /**
      * Connects to the Sendspin server and performs the client/hello -> server/hello handshake.
      * [host] and [sendspinPort] point at the Music Assistant server's Sendspin endpoint
-     * (ws://host:sendspinPort/sendspin).
+     * (ws://host:sendspinPort/sendspin). [delayMs] configures speaker delay compensation.
      */
-    fun connect(host: String, sendspinPort: String, clientId: String, playerName: String) {
+    fun connect(host: String, sendspinPort: String, clientId: String, playerName: String, delayMs: Int = 0) {
         disconnect("restart") // clean up any prior connection first
 
+        staticDelayMs = delayMs
         val cleanHost = host.trim().removePrefix("http://").removePrefix("https://").substringBefore("/").substringBefore(":")
         if (cleanHost.isEmpty()) {
             _state.value = SendspinState.Error("Host inválido")
@@ -248,6 +249,13 @@ class SendspinClient {
             })
         }
         ws.send(stateMsg.toString())
+    }
+
+    /** Dynamically updates speaker delay compensation (e.g. for Bluetooth or multi-room alignment). */
+    fun setStaticDelay(delayMs: Int) {
+        staticDelayMs = delayMs
+        needsRealign = true
+        sendClientState(if (_state.value is SendspinState.Playing) "synchronized" else "idle")
     }
 
     private fun startTimeSyncLoop(ws: WebSocket) {
