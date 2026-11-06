@@ -333,6 +333,14 @@ class MusicAssistantClient {
 
     suspend fun getPlayers(host: String, port: String, user: String, pass: String, token: String): List<Player> {
         return try {
+            // If the persistent remote-control session is active, request directly over it (ultra-fast)
+            if (isSessionConnected) {
+                val sessionRes = sendSessionCommand("players/all")
+                if (sessionRes != null) {
+                    val parsed = parsePlayers(sessionRes.toString())
+                    if (parsed.isNotEmpty()) return parsed
+                }
+            }
             val resolvedToken = resolveToken(host, port, user, pass, token) ?: return emptyList()
             val responseString = executeWebSocketCommand(host, port, "players/all", resolvedToken) ?: return emptyList()
             val cleanJson = getCleanJson(responseString)
@@ -905,7 +913,8 @@ class MusicAssistantClient {
                 json.startsWith("[") -> JSONArray(json)
                 else -> {
                     val obj = JSONObject(json)
-                    obj.optJSONArray("items")
+                    obj.optJSONArray("result")
+                        ?: obj.optJSONArray("items")
                         ?: obj.optJSONArray("results")
                         ?: obj.optJSONArray("data")
                         ?: obj.optJSONArray("players")

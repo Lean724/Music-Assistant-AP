@@ -123,6 +123,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
     private val _availablePlayers = MutableStateFlow<List<Player>>(emptyList())
     val availablePlayers: StateFlow<List<Player>> = _availablePlayers
 
+    private val _isRefreshingPlayers = MutableStateFlow(false)
+    val isRefreshingPlayers: StateFlow<Boolean> = _isRefreshingPlayers
+
     private val _activePlayer = MutableStateFlow<Player?>(null)
     val activePlayer: StateFlow<Player?> = _activePlayer
 
@@ -338,7 +341,56 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
+        // Auto-refresh available players when Sendspin client registers on the server
+        viewModelScope.launch {
+            sendspinState.collect { state ->
+                if (state is SendspinState.Connected || state is SendspinState.Playing) {
+                    delay(1200)
+                    refreshPlayers()
+                }
+            }
+        }
+
         loadLibrary()
+    }
+
+    fun getLocalDevicePlayer(): Player {
+        val name = localPlayerName.value.trim().ifEmpty {
+            "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim().ifEmpty { "Dispositivo" }
+        }
+        return Player(
+            id = "local_phone",
+            name = name,
+            state = if (_isPlaying.value && !_isRemoteSession.value) "playing" else "idle",
+            volume = _volume.value
+        )
+    }
+
+    fun isThisDevice(player: Player): Boolean {
+        if (player.id == "local_phone") return true
+        val clientId = configManager.sendspinClientId
+        if (player.id.contains(clientId, ignoreCase = true)) return true
+        val currentLocalName = localPlayerName.value.trim()
+        return currentLocalName.isNotEmpty() && player.name.equals(currentLocalName, ignoreCase = true)
+    }
+
+    private fun mergePlayersWithLocalDevice(serverPlayers: List<Player>): List<Player> {
+        val currentLocalName = localPlayerName.value.trim()
+        val clientId = configManager.sendspinClientId
+
+        // Find if server has registered this device as a player (Sendspin)
+        val serverThisDevice = serverPlayers.firstOrNull { p ->
+            p.id.contains(clientId, ignoreCase = true) ||
+            (p.name.equals(currentLocalName, ignoreCase = true) && p.id.contains("sendspin", ignoreCase = true)) ||
+            (currentLocalName.isNotEmpty() && p.name.equals(currentLocalName, ignoreCase = true))
+        }
+
+        return if (serverThisDevice != null) {
+            val others = serverPlayers.filter { it.id != serverThisDevice.id }
+            listOf(serverThisDevice) + others
+        } else {
+            listOf(getLocalDevicePlayer()) + serverPlayers
+        }
     }
 
     // Load library items depending on Demo Mode
@@ -354,10 +406,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                 _artists.value = mockArtists
                 _albums.value = mockAlbums
                 _playlists.value = mockPlaylists
-                val demoList = listOf(LOCAL_PHONE_PLAYER) + mockPlayers
+                val demoList = listOf(getLocalDevicePlayer()) + mockPlayers
                 _availablePlayers.value = demoList
                 val savedPlayerId = configManager.activePlayerId
-                val selected = demoList.find { it.id == savedPlayerId } ?: LOCAL_PHONE_PLAYER
+                val selected = demoList.find { it.id == savedPlayerId } ?: demoList.first()
                 setActivePlayer(selected)
                 syncLocalPlayerConnection()
                 _isLoading.value = false
@@ -384,10 +436,10 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     _albums.value = realAlbums
                     _playlists.value = realPlaylists
                     
-                    val combinedPlayers = listOf(LOCAL_PHONE_PLAYER) + realPlayers
+                    val combinedPlayers = mergePlayersWithLocalDevice(realPlayers)
                     _availablePlayers.value = combinedPlayers
                     val savedPlayerId = configManager.activePlayerId
-                    val selected = combinedPlayers.find { it.id == savedPlayerId } ?: LOCAL_PHONE_PLAYER
+                    val selected = combinedPlayers.find { it.id == savedPlayerId } ?: combinedPlayers.first()
                     setActivePlayer(selected)
 
                     // Open (or reuse) the persistent WebSocket session for real-time remote control.
@@ -409,9 +461,9 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                     _artists.value = emptyList()
                     _albums.value = emptyList()
                     _playlists.value = emptyList()
-                    val fallbackList = listOf(LOCAL_PHONE_PLAYER)
+                    val fallbackList = listOf(getLocalDevicePlayer())
                     _availablePlayers.value = fallbackList
-                    setActivePlayer(LOCAL_PHONE_PLAYER)
+                    setActivePlayer(fallbackList.first())
                 } finally {
                     _isLoading.value = false
                 }
@@ -438,20 +490,29 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
                 }
+                "player_added", "player_removed", "players_updated" -> {
+                    refreshPlayers()
+                }
                 "player_updated" -> {
                     val playerId = data.optString("player_id", objectId ?: return)
                     val state = data.optString("state", "idle")
                     val volume = data.optInt("volume_level", -1)
                     val isMuted = data.optBoolean("is_muted", false)
 
-                    _availablePlayers.value = _availablePlayers.value.map { p ->
-                        if (p.id == playerId) {
-                            p.copy(
-                                state = state,
-                                volume = if (volume >= 0) volume else p.volume,
-                                isMuted = isMuted
-                            )
-                        } else p
+                    val exists = _availablePlayers.value.any { it.id == playerId }
+                    if (!exists) {
+                        // A new player was updated/registered that wasn't in our cached list yet
+                        refreshPlayers()
+                    } else {
+                        _availablePlayers.value = _availablePlayers.value.map { p ->
+                            if (p.id == playerId) {
+                                p.copy(
+                                    state = state,
+                                    volume = if (volume >= 0) volume else p.volume,
+                                    isMuted = isMuted
+                                )
+                            } else p
+                        }
                     }
 
                     if (playerId == _activePlayer.value?.id) {
@@ -707,6 +768,59 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         sendspinPort.value = sendspinPortValue
         sendspinDelayMs.value = delayMs
         syncLocalPlayerConnection()
+        if (enabled) {
+            viewModelScope.launch {
+                delay(1500)
+                refreshPlayers()
+            }
+        }
+    }
+
+    /**
+     * Refreshes the list of active players from the Music Assistant server.
+     * Can be invoked whenever the player selection sheet opens, when Sendspin connects,
+     * or via user manual refresh.
+     */
+    fun refreshPlayers(onComplete: (() -> Unit)? = null) {
+        viewModelScope.launch {
+            if (useDemoMode.value) {
+                val demoList = listOf(getLocalDevicePlayer()) + mockPlayers
+                _availablePlayers.value = demoList
+                onComplete?.invoke()
+                return@launch
+            }
+            if (host.value.isEmpty()) {
+                onComplete?.invoke()
+                return@launch
+            }
+            _isRefreshingPlayers.value = true
+            try {
+                val resolvedToken = token.value.ifEmpty {
+                    client.resolveToken(host.value, port.value, username.value, password.value, "") ?: ""
+                }
+                val realPlayers = client.getPlayers(host.value, port.value, username.value, password.value, resolvedToken)
+                val combinedPlayers = mergePlayersWithLocalDevice(realPlayers)
+                _availablePlayers.value = combinedPlayers
+
+                // If active player is already set, update its reference with current server data
+                _activePlayer.value?.let { current ->
+                    val fresh = combinedPlayers.find { it.id == current.id }
+                        ?: if (isThisDevice(current)) combinedPlayers.firstOrNull { isThisDevice(it) } else null
+                    if (fresh != null) {
+                        _activePlayer.value = fresh
+                    }
+                } ?: run {
+                    val saved = configManager.activePlayerId
+                    val matched = combinedPlayers.find { it.id == saved } ?: combinedPlayers.first()
+                    setActivePlayer(matched)
+                }
+            } catch (e: Exception) {
+                Log.e("MusicViewModel", "Error refreshing players: ${e.message}")
+            } finally {
+                _isRefreshingPlayers.value = false
+                onComplete?.invoke()
+            }
+        }
     }
 
     /** Dynamically updates speaker delay compensation (latency offset in milliseconds). */
@@ -858,14 +972,5 @@ class MusicViewModel(application: Application) : AndroidViewModel(application) {
         playerManager.release()
         client.disconnectSession()
         sendspinClient.disconnect("shutdown")
-    }
-
-    companion object {
-        val LOCAL_PHONE_PLAYER = Player(
-            id = "local_phone",
-            name = "Mi Teléfono (Este Dispositivo)",
-            state = "idle",
-            volume = 75
-        )
     }
 }

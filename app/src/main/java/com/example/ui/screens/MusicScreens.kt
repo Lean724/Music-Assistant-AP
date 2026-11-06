@@ -1,6 +1,8 @@
 package com.example.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -106,7 +108,7 @@ fun LibraryScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(
@@ -115,58 +117,64 @@ fun LibraryScreen(
                     startY = 0f,
                     endY = 600f
                 )
-            )
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            ),
+        contentAlignment = Alignment.TopCenter
     ) {
-        // App Branding / Greeting
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp, top = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .widthIn(max = 900.dp)
+                .fillMaxSize()
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
-            Text(
-                text = "Tu Música",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = (-0.5).sp
-                ),
-                color = Color.White
-            )
-            SpeakerIndicator(viewModel = viewModel)
-        }
-
-        // Library Horizontal Categories Tabs
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val tabs = listOf(
-                "canciones" to "Canciones",
-                "artistas" to "Artistas",
-                "albumes" to "Álbumes",
-                "playlists" to "Playlists"
-            )
-            tabs.forEach { (key, label) ->
-                val isActive = selectedTab == key
-                FilterChip(
-                    selected = isActive,
-                    onClick = { selectedTab = key },
-                    label = { Text(label, color = if (isActive) Color.Black else Color.White) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = accentColor,
-                        containerColor = Color(0xFF2A2A2A)
+            // App Branding / Greeting
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp, top = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.title_your_music),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.5).sp
                     ),
-                    border = null,
-                    shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.testTag("lib_chip_$key")
+                    color = Color.White
                 )
+                SpeakerIndicator(viewModel = viewModel)
             }
-        }
+
+            // Library Horizontal Categories Tabs
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val tabs = listOf(
+                    "canciones" to stringResource(R.string.tab_tracks),
+                    "artistas" to stringResource(R.string.tab_artists),
+                    "albumes" to stringResource(R.string.tab_albums),
+                    "playlists" to stringResource(R.string.tab_playlists)
+                )
+                tabs.forEach { (key, label) ->
+                    val isActive = selectedTab == key
+                    FilterChip(
+                        selected = isActive,
+                        onClick = { selectedTab = key },
+                        label = { Text(label, color = if (isActive) Color.Black else Color.White) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = accentColor,
+                            containerColor = Color(0xFF2A2A2A)
+                        ),
+                        border = null,
+                        shape = RoundedCornerShape(20.dp),
+                        modifier = Modifier.testTag("lib_chip_$key")
+                    )
+                }
+            }
 
         // List Content with animated transitions
         Box(modifier = Modifier.weight(1.0f)) {
@@ -317,7 +325,7 @@ fun LibraryScreen(
         TextField(
             value = searchQuery,
             onValueChange = { viewModel.searchQuery.value = it },
-            placeholder = { Text("¿Qué deseas escuchar?", color = Color.Gray) },
+            placeholder = { Text(stringResource(R.string.search_placeholder), color = Color.Gray) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Gray) },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
@@ -342,6 +350,7 @@ fun LibraryScreen(
                 .padding(bottom = 8.dp)
                 .testTag("library_search_input")
         )
+        }
     }
 }
 
@@ -521,38 +530,44 @@ fun QueueScreen(
 
     val isQueueResultEmpty = (filteredQueue.isEmpty() && (!showCurrentTrack || currentTrack == null))
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            .background(Color(0xFF121212)),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp, top = 24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .fillMaxSize()
+                .widthIn(max = 850.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
-            Text(
-                text = "Cola de reproducción",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp
-                ),
-                color = Color.White,
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp, top = 24.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.queue_title),
+                    style = MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 28.sp
+                    ),
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
 
-            if (queue.isNotEmpty()) {
-                TextButton(
-                    onClick = { viewModel.clearQueue() },
-                    modifier = Modifier.testTag("clear_queue_button")
-                ) {
-                    Text("Borrar todo", color = Color(0xFFFF5555), fontWeight = FontWeight.Bold)
+                if (queue.isNotEmpty()) {
+                    TextButton(
+                        onClick = { viewModel.clearQueue() },
+                        modifier = Modifier.testTag("clear_queue_button")
+                    ) {
+                        Text(stringResource(R.string.clear_queue), color = Color(0xFFFF5555), fontWeight = FontWeight.Bold)
+                    }
                 }
             }
-        }
 
         // Speaker connection badge
         SpeakerIndicator(
@@ -573,7 +588,7 @@ fun QueueScreen(
                         modifier = Modifier.size(80.dp).padding(bottom = 16.dp)
                     )
                     Text(
-                        text = "La cola de reproducción está vacía.\nSelecciona canciones en la Biblioteca.",
+                        text = stringResource(R.string.empty_queue),
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         lineHeight = 20.sp
@@ -595,7 +610,7 @@ fun QueueScreen(
                 if (showCurrentTrack) {
                     item {
                         Text(
-                            text = "Reproduciendo ahora",
+                            text = stringResource(R.string.now_playing),
                             fontWeight = FontWeight.Bold,
                             color = accentColor,
                             fontSize = 14.sp,
@@ -654,7 +669,7 @@ fun QueueScreen(
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Siguiente en la lista (${otherSongs.size})",
+                            text = "${stringResource(R.string.up_next)} (${otherSongs.size})",
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             fontSize = 14.sp,
@@ -724,7 +739,7 @@ fun QueueScreen(
         TextField(
             value = queueSearchQuery,
             onValueChange = { queueSearchQuery = it },
-            placeholder = { Text("Buscar en la cola...", color = Color.Gray) },
+            placeholder = { Text(stringResource(R.string.search_placeholder), color = Color.Gray) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar en cola", tint = Color.Gray) },
             trailingIcon = {
                 if (queueSearchQuery.isNotEmpty()) {
@@ -749,6 +764,7 @@ fun QueueScreen(
                 .padding(bottom = 8.dp)
                 .testTag("queue_search_input")
         )
+        }
     }
 }
 
@@ -808,209 +824,215 @@ fun SettingsScreen(
         "#A855F7" to "Violeta"
     )
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF121212))
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .background(Color(0xFF121212)),
+        contentAlignment = Alignment.TopCenter
     ) {
-        if (showServerSubmenu) {
-            // SUBMENU LAYOUT
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp, top = 24.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { showServerSubmenu = false }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.White)
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Configuración del Servidor",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = Color.White
-                )
-            }
-
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = 760.dp)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            if (showServerSubmenu) {
+                // SUBMENU LAYOUT
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp, top = 24.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { showServerSubmenu = false }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back), tint = Color.White)
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Music Assistant Server",
-                        fontWeight = FontWeight.Bold,
-                        color = accentColor,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    // Host Input
-                    Text("Dirección IP / Host del Servidor", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                    TextField(
-                        value = hostInput,
-                        onValueChange = { hostInput = it },
-                        placeholder = { Text("ej. 192.168.1.100", color = Color.Gray) },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF2A2A2A),
-                            unfocusedContainerColor = Color(0xFF2A2A2A),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                    )
-
-                    // Port Input
-                    Text("Puerto del Servidor", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                    TextField(
-                        value = portInput,
-                        onValueChange = { portInput = it },
-                        placeholder = { Text("ej. 8095 (por defecto)", color = Color.Gray) },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF2A2A2A),
-                            unfocusedContainerColor = Color(0xFF2A2A2A),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                    )
-
-                    // Username Input
-                    Text("Usuario", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                    TextField(
-                        value = usernameInput,
-                        onValueChange = { usernameInput = it },
-                        placeholder = { Text("Opcional", color = Color.Gray) },
-                        singleLine = true,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF2A2A2A),
-                            unfocusedContainerColor = Color(0xFF2A2A2A),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                    )
-
-                    // Password Input
-                    Text("Contraseña", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                    TextField(
-                        value = passwordInput,
-                        onValueChange = { passwordInput = it },
-                        placeholder = { Text("Opcional", color = Color.Gray) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF2A2A2A),
-                            unfocusedContainerColor = Color(0xFF2A2A2A),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                    )
-
-                    // Long-Lived Token Input
-                    Text("Token de Larga Duración (Long-Lived Token)", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                    TextField(
-                        value = tokenInput,
-                        onValueChange = { tokenInput = it },
-                        placeholder = { Text("Opcional - Para autenticación segura", color = Color.Gray) },
-                        singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = Color(0xFF2A2A2A),
-                            unfocusedContainerColor = Color(0xFF2A2A2A),
-                            focusedTextColor = Color.White,
-                            unfocusedTextColor = Color.White,
-                            focusedBorderColor = accentColor,
-                            unfocusedBorderColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(6.dp),
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                        text = stringResource(R.string.server_config),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White
                     )
                 }
-            }
 
-            // Test & Save buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Test Connection
-                Button(
-                    onClick = {
-                        viewModel.saveSettings(hostInput, portInput, usernameInput, passwordInput, tokenInput, demoInput, accentColorInput)
-                        viewModel.testConnection()
-                    },
-                    enabled = !isTesting && hostInput.isNotEmpty(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A)),
-                    modifier = Modifier.weight(1f).testTag("test_connection_button")
-                ) {
-                    if (isTesting) {
-                        CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp))
-                    } else {
-                        Text("Probar Conexión", color = Color.White)
-                    }
-                }
-
-                // Save Settings
-                Button(
-                    onClick = {
-                        viewModel.saveSettings(hostInput, portInput, usernameInput, passwordInput, tokenInput, demoInput, accentColorInput)
-                        showServerSubmenu = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = accentColor),
-                    modifier = Modifier.weight(1f).testTag("submit_button")
-                ) {
-                    Text("Guardar", color = Color.Black, fontWeight = FontWeight.Bold)
-                }
-            }
-
-            // Connection outcome message
-            if (testResult.isNotEmpty()) {
                 Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (testResult.contains("✓")) Color(0xFF143020) else Color(0xFF421C1C)
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                 ) {
-                    Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = if (testResult.contains("✓")) Icons.Default.CheckCircle else Icons.Default.Error,
-                            contentDescription = null,
-                            tint = if (testResult.contains("✓")) accentColor else Color(0xFFFFAAAA),
-                            modifier = Modifier.size(20.dp).padding(end = 6.dp)
-                        )
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = testResult,
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Medium
+                            text = "Music Assistant Server",
+                            fontWeight = FontWeight.Bold,
+                            color = accentColor,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+
+                        // Host Input
+                        Text(stringResource(R.string.server_host), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        TextField(
+                            value = hostInput,
+                            onValueChange = { hostInput = it },
+                            placeholder = { Text("192.168.1.100", color = Color.Gray) },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFF2A2A2A),
+                                unfocusedContainerColor = Color(0xFF2A2A2A),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = accentColor,
+                                unfocusedBorderColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                        )
+
+                        // Port Input
+                        Text(stringResource(R.string.server_port), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        TextField(
+                            value = portInput,
+                            onValueChange = { portInput = it },
+                            placeholder = { Text("8095", color = Color.Gray) },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFF2A2A2A),
+                                unfocusedContainerColor = Color(0xFF2A2A2A),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = accentColor,
+                                unfocusedBorderColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                        )
+
+                        // Username Input
+                        Text(stringResource(R.string.server_username), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        TextField(
+                            value = usernameInput,
+                            onValueChange = { usernameInput = it },
+                            placeholder = { Text(stringResource(R.string.optional), color = Color.Gray) },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFF2A2A2A),
+                                unfocusedContainerColor = Color(0xFF2A2A2A),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = accentColor,
+                                unfocusedBorderColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                        )
+
+                        // Password Input
+                        Text(stringResource(R.string.server_password), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        TextField(
+                            value = passwordInput,
+                            onValueChange = { passwordInput = it },
+                            placeholder = { Text(stringResource(R.string.optional), color = Color.Gray) },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFF2A2A2A),
+                                unfocusedContainerColor = Color(0xFF2A2A2A),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = accentColor,
+                                unfocusedBorderColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                        )
+
+                        // Long-Lived Token Input
+                        Text(stringResource(R.string.server_token), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        TextField(
+                            value = tokenInput,
+                            onValueChange = { tokenInput = it },
+                            placeholder = { Text(stringResource(R.string.optional), color = Color.Gray) },
+                            singleLine = true,
+                            visualTransformation = PasswordVisualTransformation(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color(0xFF2A2A2A),
+                                unfocusedContainerColor = Color(0xFF2A2A2A),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = accentColor,
+                                unfocusedBorderColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
                         )
                     }
                 }
-            }
-        } else {
+
+                // Test & Save buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Test Connection
+                    Button(
+                        onClick = {
+                            viewModel.saveSettings(hostInput, portInput, usernameInput, passwordInput, tokenInput, demoInput, accentColorInput)
+                            viewModel.testConnection()
+                        },
+                        enabled = !isTesting && hostInput.isNotEmpty(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2A2A2A)),
+                        modifier = Modifier.weight(1f).testTag("test_connection_button")
+                    ) {
+                        if (isTesting) {
+                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp))
+                        } else {
+                            Text(stringResource(R.string.test_connection), color = Color.White)
+                        }
+                    }
+
+                    // Save Settings
+                    Button(
+                        onClick = {
+                            viewModel.saveSettings(hostInput, portInput, usernameInput, passwordInput, tokenInput, demoInput, accentColorInput)
+                            showServerSubmenu = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = accentColor),
+                        modifier = Modifier.weight(1f).testTag("submit_button")
+                    ) {
+                        Text(stringResource(R.string.save), color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                }
+
+                // Connection outcome message
+                if (testResult.isNotEmpty()) {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (testResult.contains("✓")) Color(0xFF143020) else Color(0xFF421C1C)
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+                    ) {
+                        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (testResult.contains("✓")) Icons.Default.CheckCircle else Icons.Default.Error,
+                                contentDescription = null,
+                                tint = if (testResult.contains("✓")) accentColor else Color(0xFFFFAAAA),
+                                modifier = Modifier.size(20.dp).padding(end = 6.dp)
+                            )
+                            Text(
+                                text = testResult,
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+            } else {
             // MAIN SETTINGS LAYOUT
             Text(
-                text = "Configuración",
+                text = stringResource(R.string.settings_title),
                 style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 24.dp, top = 24.dp)
@@ -1035,19 +1057,19 @@ fun SettingsScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Dns,
-                            contentDescription = "Servidor",
+                            contentDescription = stringResource(R.string.server_config),
                             tint = accentColor,
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
-                                text = "Configuración del Servidor",
+                                text = stringResource(R.string.server_config),
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp
                             )
-                            val statusText = if (isDemoMode) "Modo Demostración activo" else if (currentHost.isNotEmpty()) "Servidor: $currentHost" else "Sin configurar"
+                            val statusText = if (isDemoMode) stringResource(R.string.server_status_demo) else if (currentHost.isNotEmpty()) stringResource(R.string.server_status_configured, currentHost) else stringResource(R.string.server_status_unconfigured)
                             Text(
                                 text = statusText,
                                 color = Color.Gray,
@@ -1071,7 +1093,7 @@ fun SettingsScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Personalización",
+                        text = stringResource(R.string.personalization),
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         fontSize = 16.sp,
@@ -1080,7 +1102,7 @@ fun SettingsScreen(
 
                     // Dynamic Accent Color Picker
                     Text(
-                        text = "Color de Acento",
+                        text = stringResource(R.string.accent_color),
                         color = Color.LightGray,
                         fontSize = 12.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -1132,8 +1154,8 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                            Text("Modo Demostración / Simulación", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                            Text("Permite explorar y reproducir música de sandbox en la nube si tu servidor físico no es accesible.", color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp)
+                            Text(stringResource(R.string.demo_mode_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text(stringResource(R.string.demo_mode_desc), color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp)
                         }
                         Switch(
                             checked = demoInput,
@@ -1166,9 +1188,9 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                            Text("Reproductor Local (este teléfono)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text(stringResource(R.string.local_player_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                             Text(
-                                "Registra este teléfono como un player real de Music Assistant (protocolo Sendspin), con audio sincronizado de verdad.",
+                                stringResource(R.string.local_player_desc),
                                 color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp
                             )
                         }
@@ -1189,11 +1211,11 @@ fun SettingsScreen(
 
                         // Live connection status
                         val (statusText, statusColor) = when (sendspinState) {
-                            is SendspinState.Disconnected -> "Desconectado" to Color.Gray
-                            is SendspinState.Connecting -> "Conectando…" to Color(0xFFEAB308)
-                            is SendspinState.Connected -> "Conectado, esperando audio" to accentColor
-                            is SendspinState.Playing -> "Reproduciendo, sincronizado" to Color(0xFF22C55E)
-                            is SendspinState.Buffering -> "Sincronizando…" to Color(0xFFEAB308)
+                            is SendspinState.Disconnected -> stringResource(R.string.status_disconnected) to Color.Gray
+                            is SendspinState.Connecting -> stringResource(R.string.status_connecting) to Color(0xFFEAB308)
+                            is SendspinState.Connected -> stringResource(R.string.status_connected_waiting) to accentColor
+                            is SendspinState.Playing -> stringResource(R.string.status_playing_synced) to Color(0xFF22C55E)
+                            is SendspinState.Buffering -> stringResource(R.string.status_syncing) to Color(0xFFEAB308)
                             is SendspinState.Error -> "Error: ${(sendspinState as SendspinState.Error).message}" to Color(0xFFEF4444)
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
@@ -1207,7 +1229,7 @@ fun SettingsScreen(
                             Text(statusText, color = statusColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                         }
 
-                        Text("Nombre del reproductor", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        Text(stringResource(R.string.device_name), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
                         TextField(
                             value = localPlayerNameInput,
                             onValueChange = { localPlayerNameInput = it },
@@ -1224,11 +1246,11 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                         )
 
-                        Text("Puerto Sendspin", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                        Text(stringResource(R.string.sendspin_port), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
                         TextField(
                             value = sendspinPortInput,
                             onValueChange = { sendspinPortInput = it },
-                            placeholder = { Text("8927 (por defecto)", color = Color.Gray) },
+                            placeholder = { Text("8927", color = Color.Gray) },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = Color(0xFF2A2A2A),
@@ -1243,9 +1265,9 @@ fun SettingsScreen(
                         )
 
                         // Speaker Delay Compensation (retardo de altavoz)
-                        Text("Compensación de retardo (Speaker Delay)", color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 2.dp))
+                        Text(stringResource(R.string.speaker_delay), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 2.dp))
                         Text(
-                            "Ajusta la latencia (en ms) para alinear el audio de este teléfono con otros altavoces o compensar el retraso de auriculares Bluetooth.",
+                            stringResource(R.string.speaker_delay_desc),
                             color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.padding(bottom = 6.dp)
                         )
                         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
@@ -1280,7 +1302,7 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            listOf(0 to "0 ms (Directo)", 150 to "150 ms", 300 to "300 ms (BT)").forEach { (ms, label) ->
+                            listOf(0 to "0 ms", 150 to "150 ms", 300 to "300 ms (BT)").forEach { (ms, label) ->
                                 val isSelected = sendspinDelayInput == ms
                                 Box(
                                     modifier = Modifier
@@ -1312,11 +1334,11 @@ fun SettingsScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = accentColor),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Aplicar y reconectar", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.apply_reconnect), color = Color.Black, fontWeight = FontWeight.Bold)
                         }
 
                         Text(
-                            "Una vez conectado, este teléfono aparecerá en la lista de reproductores (con el nombre de arriba). Seleccionalo ahí para reproducir en él.",
+                            stringResource(R.string.server_info_helper),
                             color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp,
                             modifier = Modifier.padding(top = 10.dp)
                         )
@@ -1339,7 +1361,7 @@ fun SettingsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
-                            contentDescription = "Información",
+                            contentDescription = stringResource(R.string.about_title),
                             tint = accentColor,
                             modifier = Modifier.size(24.dp)
                         )
@@ -1352,7 +1374,7 @@ fun SettingsScreen(
                                 fontSize = 14.sp
                             )
                             Text(
-                                text = "Versión 1.2 • Cliente ligero independiente",
+                                text = stringResource(R.string.about_version),
                                 color = Color.Gray,
                                 fontSize = 11.sp
                             )
@@ -1362,7 +1384,7 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "MMAC es una aplicación simplificada y básica para conectar con tu servidor de Music Assistant y reproducir tu música. No es una versión oficial y es desarrollada y mantenida actualmente por una única persona.",
+                        text = stringResource(R.string.about_disclaimer),
                         color = Color.LightGray,
                         fontSize = 12.sp,
                         lineHeight = 16.sp
@@ -1371,7 +1393,7 @@ fun SettingsScreen(
                     HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 12.dp))
 
                     Text(
-                        text = "Atribuciones y Reconocimientos:",
+                        text = stringResource(R.string.about_attributions),
                         color = accentColor,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
@@ -1386,6 +1408,7 @@ fun SettingsScreen(
                     )
                 }
             }
+        }
         }
     }
 }
@@ -1685,6 +1708,7 @@ fun FullScreenPlayerDialog(
     
     val availablePlayers by viewModel.availablePlayers.collectAsStateWithLifecycle()
     val activePlayer by viewModel.activePlayer.collectAsStateWithLifecycle()
+    val isRefreshingPlayers by viewModel.isRefreshingPlayers.collectAsStateWithLifecycle()
 
     var showPlayerPicker by remember { mutableStateOf(false) }
 
@@ -1739,7 +1763,7 @@ fun FullScreenPlayerDialog(
         },
         containerColor = Color(0xFF0F0F0F)
     ) { innerPadding ->
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -1751,238 +1775,497 @@ fun FullScreenPlayerDialog(
                     )
                 )
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            contentAlignment = Alignment.Center
         ) {
-            // Giant Pulsing/Spinning Cover Art
-            Box(
-                modifier = Modifier
-                    .weight(1.0f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Surface(
-                    modifier = Modifier
-                        .size(280.dp)
-                        .graphicsLayer {
-                            if (isPlaying) {
-                                rotationX = 0f
-                            }
-                        },
-                    shape = RoundedCornerShape(20.dp),
-                    tonalElevation = 8.dp,
-                    shadowElevation = 12.dp
-                ) {
-                    TrackCoverImage(
-                        imageUrl = track.image,
-                        accentColor = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(20.dp),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-            }
+            val isTabletMode = maxWidth >= 600.dp
+            val livePercent = if (duration > 0) position.toFloat() / duration else 0f
+            val displayedPercent = draggingProgress ?: livePercent
+            val displayedPositionSec = if (draggingProgress != null) (draggingProgress!! * duration).toInt() else position
 
-            // Title and artist
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-            ) {
+            if (isTabletMode) {
+                // Tablet Landscape / Wide Screen: 2 Columns
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .widthIn(max = 1000.dp),
+                    horizontalArrangement = Arrangement.spacedBy(36.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1.0f)) {
-                        Text(
-                            text = track.name,
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Text(
-                            text = track.artist,
-                            color = Color.LightGray,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                    // Left Column: Album Cover
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(320.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            tonalElevation = 8.dp,
+                            shadowElevation = 14.dp
+                        ) {
+                            TrackCoverImage(
+                                imageUrl = track.image,
+                                accentColor = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(24.dp),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
                     }
-                    IconButton(onClick = { /* Me gusta toggle */ }) {
-                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Guardar", tint = Color.White)
+
+                    // Right Column: Controls, Sliders, Title
+                    Column(
+                        modifier = Modifier
+                            .weight(1.2f)
+                            .fillMaxHeight()
+                            .padding(vertical = 16.dp),
+                        verticalArrangement = Arrangement.SpaceEvenly,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Title and artist
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1.0f)) {
+                                Text(
+                                    text = track.name,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = track.artist,
+                                    color = Color.LightGray,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            IconButton(onClick = { }) {
+                                Icon(Icons.Default.FavoriteBorder, contentDescription = "Guardar", tint = Color.White)
+                            }
+                        }
+
+                        // Progress Slider
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Slider(
+                                value = displayedPercent,
+                                onValueChange = { percent -> draggingProgress = percent },
+                                onValueChangeFinished = {
+                                    val targetSec = ((draggingProgress ?: livePercent) * duration).toInt()
+                                    viewModel.seekTo(targetSec)
+                                    draggingProgress = null
+                                },
+                                colors = SliderDefaults.colors(
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = Color.DarkGray,
+                                    thumbColor = Color.White
+                                ),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = String.format("%02d:%02d", displayedPositionSec / 60, displayedPositionSec % 60),
+                                    color = Color.Gray,
+                                    fontSize = 12.sp
+                                )
+                                Text(
+                                    text = String.format("%02d:%02d", duration / 60, duration % 60),
+                                    color = Color.Gray,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+
+                        // Music Controls Row
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = { viewModel.toggleShuffle() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Shuffle,
+                                    contentDescription = "Aleatorio",
+                                    tint = if (shuffleEnabled) MaterialTheme.colorScheme.primary else Color.White
+                                )
+                            }
+
+                            IconButton(onClick = { viewModel.skipPrevious() }) {
+                                Icon(
+                                    imageVector = Icons.Default.SkipPrevious,
+                                    contentDescription = "Anterior",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .size(76.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .clickable { viewModel.togglePlayPause() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                    contentDescription = "Reproducir o Pausar",
+                                    tint = Color.Black,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+
+                            IconButton(onClick = { viewModel.skipNext() }) {
+                                Icon(
+                                    imageVector = Icons.Default.SkipNext,
+                                    contentDescription = "Siguiente",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(40.dp)
+                                )
+                            }
+
+                            IconButton(onClick = { viewModel.toggleRepeat() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Repeat,
+                                    contentDescription = "Repetir",
+                                    tint = if (repeatEnabled) MaterialTheme.colorScheme.primary else Color.White
+                                )
+                            }
+                        }
+
+                        // Volume slider
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.VolumeMute, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+                            Slider(
+                                value = draggingVolume ?: volume.toFloat(),
+                                onValueChange = { draggingVolume = it },
+                                onValueChangeFinished = {
+                                    viewModel.setVolume((draggingVolume ?: volume.toFloat()).toInt())
+                                    draggingVolume = null
+                                },
+                                valueRange = 0f..100f,
+                                colors = SliderDefaults.colors(
+                                    activeTrackColor = Color.White,
+                                    inactiveTrackColor = Color.DarkGray,
+                                    thumbColor = Color.White
+                                ),
+                                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                            )
+                            Icon(Icons.Default.VolumeUp, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+                        }
                     }
                 }
-            }
-
-            // Progress Slider
-            Column(modifier = Modifier.fillMaxWidth()) {
-                val livePercent = if (duration > 0) position.toFloat() / duration else 0f
-                val displayedPercent = draggingProgress ?: livePercent
-                val displayedPositionSec = if (draggingProgress != null) (draggingProgress!! * duration).toInt() else position
-                Slider(
-                    value = displayedPercent,
-                    onValueChange = { percent -> draggingProgress = percent },
-                    onValueChangeFinished = {
-                        val targetSec = ((draggingProgress ?: livePercent) * duration).toInt()
-                        viewModel.seekTo(targetSec)
-                        draggingProgress = null
-                    },
-                    colors = SliderDefaults.colors(
-                        activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = Color.DarkGray,
-                        thumbColor = Color.White
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+            } else {
+                // Phone Layout: Vertical Column
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = String.format("%02d:%02d", displayedPositionSec / 60, displayedPositionSec % 60),
-                        color = Color.Gray,
-                        fontSize = 11.sp
-                    )
-                    Text(
-                        text = String.format("%02d:%02d", duration / 60, duration % 60),
-                        color = Color.Gray,
-                        fontSize = 11.sp
-                    )
-                }
-            }
+                    // Giant Pulsing/Spinning Cover Art
+                    Box(
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(280.dp),
+                            shape = RoundedCornerShape(20.dp),
+                            tonalElevation = 8.dp,
+                            shadowElevation = 12.dp
+                        ) {
+                            TrackCoverImage(
+                                imageUrl = track.image,
+                                accentColor = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(20.dp),
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
 
-            // Music Controls Row
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Shuffle
-                IconButton(onClick = { viewModel.toggleShuffle() }) {
-                    Icon(
-                        imageVector = Icons.Default.Shuffle,
-                        contentDescription = "Aleatorio",
-                        tint = if (shuffleEnabled) MaterialTheme.colorScheme.primary else Color.White
-                    )
-                }
+                    // Title and artist
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1.0f)) {
+                                Text(
+                                    text = track.name,
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = track.artist,
+                                    color = Color.LightGray,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            IconButton(onClick = { }) {
+                                Icon(Icons.Default.FavoriteBorder, contentDescription = "Guardar", tint = Color.White)
+                            }
+                        }
+                    }
 
-                // Previous
-                IconButton(onClick = { viewModel.skipPrevious() }) {
-                    Icon(
-                        imageVector = Icons.Default.SkipPrevious,
-                        contentDescription = "Anterior",
-                        tint = Color.White,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
+                    // Progress Slider
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Slider(
+                            value = displayedPercent,
+                            onValueChange = { percent -> draggingProgress = percent },
+                            onValueChangeFinished = {
+                                val targetSec = ((draggingProgress ?: livePercent) * duration).toInt()
+                                viewModel.seekTo(targetSec)
+                                draggingProgress = null
+                            },
+                            colors = SliderDefaults.colors(
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = Color.DarkGray,
+                                thumbColor = Color.White
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = String.format("%02d:%02d", displayedPositionSec / 60, displayedPositionSec % 60),
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                            Text(
+                                text = String.format("%02d:%02d", duration / 60, duration % 60),
+                                color = Color.Gray,
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
 
-                // Play / Pause Giant Action Button
-                Box(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .clickable { viewModel.togglePlayPause() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = "Reproducir o Pausar",
-                        tint = Color.Black,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
+                    // Music Controls Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = { viewModel.toggleShuffle() }) {
+                            Icon(
+                                imageVector = Icons.Default.Shuffle,
+                                contentDescription = "Aleatorio",
+                                tint = if (shuffleEnabled) MaterialTheme.colorScheme.primary else Color.White
+                            )
+                        }
 
-                // Next
-                IconButton(onClick = { viewModel.skipNext() }) {
-                    Icon(
-                        imageVector = Icons.Default.SkipNext,
-                        contentDescription = "Siguiente",
-                        tint = Color.White,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
+                        IconButton(onClick = { viewModel.skipPrevious() }) {
+                            Icon(
+                                imageVector = Icons.Default.SkipPrevious,
+                                contentDescription = "Anterior",
+                                tint = Color.White,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
 
-                // Repeat
-                IconButton(onClick = { viewModel.toggleRepeat() }) {
-                    Icon(
-                        imageVector = Icons.Default.Repeat,
-                        contentDescription = "Repetir",
-                        tint = if (repeatEnabled) MaterialTheme.colorScheme.primary else Color.White
-                    )
-                }
-            }
+                        Box(
+                            modifier = Modifier
+                                .size(72.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable { viewModel.togglePlayPause() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = "Reproducir o Pausar",
+                                tint = Color.Black,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
 
-            // Volume slider
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(Icons.Default.VolumeMute, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
-                Slider(
-                    value = draggingVolume ?: volume.toFloat(),
-                    onValueChange = { draggingVolume = it },
-                    onValueChangeFinished = {
-                        viewModel.setVolume((draggingVolume ?: volume.toFloat()).toInt())
-                        draggingVolume = null
-                    },
-                    valueRange = 0f..100f,
-                    colors = SliderDefaults.colors(
-                        activeTrackColor = Color.White,
-                        inactiveTrackColor = Color.DarkGray,
-                        thumbColor = Color.White
-                    ),
-                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
-                )
-                Icon(Icons.Default.VolumeUp, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
+                        IconButton(onClick = { viewModel.skipNext() }) {
+                            Icon(
+                                imageVector = Icons.Default.SkipNext,
+                                contentDescription = "Siguiente",
+                                tint = Color.White,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+
+                        IconButton(onClick = { viewModel.toggleRepeat() }) {
+                            Icon(
+                                imageVector = Icons.Default.Repeat,
+                                contentDescription = "Repetir",
+                                tint = if (repeatEnabled) MaterialTheme.colorScheme.primary else Color.White
+                            )
+                        }
+                    }
+
+                    // Volume slider
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.VolumeMute, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
+                        Slider(
+                            value = draggingVolume ?: volume.toFloat(),
+                            onValueChange = { draggingVolume = it },
+                            onValueChangeFinished = {
+                                viewModel.setVolume((draggingVolume ?: volume.toFloat()).toInt())
+                                draggingVolume = null
+                            },
+                            valueRange = 0f..100f,
+                            colors = SliderDefaults.colors(
+                                activeTrackColor = Color.White,
+                                inactiveTrackColor = Color.DarkGray,
+                                thumbColor = Color.White
+                            ),
+                            modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                        )
+                        Icon(Icons.Default.VolumeUp, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(16.dp))
+                    }
+                }
             }
         }
     }
 
     // Modal Sheet selector for output audio players
     if (showPlayerPicker) {
+        LaunchedEffect(Unit) {
+            viewModel.refreshPlayers()
+        }
         AlertDialog(
             onDismissRequest = { showPlayerPicker = false },
-            title = { Text("Selecciona reproductor", color = Color.White, fontWeight = FontWeight.Bold) },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.select_player), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    IconButton(
+                        onClick = { viewModel.refreshPlayers() },
+                        enabled = !isRefreshingPlayers,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        if (isRefreshingPlayers) {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
+                        } else {
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh_list), tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
+            },
             containerColor = Color(0xFF222222),
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    availablePlayers.forEach { player ->
-                        val isSelected = player.id == activePlayer?.id
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color(0xFF1F1F1F))
-                                .clickable {
-                                    viewModel.setActivePlayer(player)
-                                    showPlayerPicker = false
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 380.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (availablePlayers.isEmpty()) {
+                        Text(
+                            text = if (isRefreshingPlayers) stringResource(R.string.searching_players) else stringResource(R.string.no_players_found),
+                            color = Color.Gray,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(vertical = 16.dp)
+                        )
+                    } else {
+                        availablePlayers.forEach { player ->
+                            val isSelected = player.id == activePlayer?.id
+                            val isThisDevice = viewModel.isThisDevice(player)
+                            val isSendspin = player.id.contains("sendspin", ignoreCase = true)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color(0xFF1F1F1F))
+                                    .clickable {
+                                        viewModel.setActivePlayer(player)
+                                        showPlayerPicker = false
+                                    }
+                                    .padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = when {
+                                        isThisDevice -> Icons.Default.Smartphone
+                                        player.id.contains("tv", true) -> Icons.Default.Tv
+                                        else -> Icons.Default.Speaker
+                                    },
+                                    contentDescription = null,
+                                    tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(14.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = player.name,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        )
+                                        if (isThisDevice) {
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.device_this_device),
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        } else if (isSendspin) {
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.badge_sendspin),
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Text(
+                                        text = when {
+                                            isSendspin -> "${stringResource(R.string.desc_sendspin_synced)} • ${if (player.state == "playing") stringResource(R.string.status_playing) else stringResource(R.string.status_ready)}"
+                                            isThisDevice -> stringResource(R.string.desc_local_standalone)
+                                            player.state == "playing" -> stringResource(R.string.status_playing)
+                                            else -> stringResource(R.string.status_inactive)
+                                        },
+                                        fontSize = 11.sp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else Color.Gray
+                                    )
                                 }
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = when {
-                                    player.id.contains("tv", true) -> Icons.Default.Tv
-                                    player.id.contains("local", true) || player.id.contains("phone", true) -> Icons.Default.PhoneAndroid
-                                    else -> Icons.Default.Speaker
-                                },
-                                contentDescription = null,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = player.name,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                )
-                                Text(
-                                    text = if (player.state == "playing") "Reproduciendo" else "Inactivo",
-                                    fontSize = 11.sp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else Color.Gray
-                                )
                             }
                         }
                     }
@@ -1990,7 +2273,7 @@ fun FullScreenPlayerDialog(
             },
             confirmButton = {
                 TextButton(onClick = { showPlayerPicker = false }) {
-                    Text("Cerrar", color = MaterialTheme.colorScheme.primary)
+                    Text(stringResource(R.string.close), color = MaterialTheme.colorScheme.primary)
                 }
             }
         )
@@ -2016,16 +2299,19 @@ fun SpeakerIndicator(
 
     var showPicker by remember { mutableStateOf(false) }
 
+    val isThisDeviceActive = activePlayer != null && viewModel.isThisDevice(activePlayer!!)
     val (icon, name) = if (isRemote && activePlayer != null) {
         val p = activePlayer!!
         val iconDevice = when {
+            isThisDeviceActive -> Icons.Default.Smartphone
             p.name.contains("TV", ignoreCase = true) || p.name.contains("pantalla", ignoreCase = true) -> Icons.Default.Tv
             p.name.contains("speaker", ignoreCase = true) || p.name.contains("parlante", ignoreCase = true) || p.name.contains("altavoz", ignoreCase = true) || p.name.contains("salon", ignoreCase = true) -> Icons.Default.Speaker
             else -> Icons.Default.Cast
         }
-        iconDevice to p.name
+        val displayName = if (isThisDeviceActive) "${p.name} (${stringResource(R.string.device_this_device)})" else p.name
+        iconDevice to displayName
     } else {
-        Icons.Default.Smartphone to "Dispositivo Local"
+        Icons.Default.Smartphone to "${viewModel.getLocalDevicePlayer().name} (${stringResource(R.string.device_this_device)})"
     }
 
     Row(
@@ -2040,7 +2326,7 @@ fun SpeakerIndicator(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = "Altavoz Activo",
+            contentDescription = stringResource(R.string.active_speaker),
             tint = accentColor,
             modifier = Modifier.size(16.dp)
         )
@@ -2054,51 +2340,129 @@ fun SpeakerIndicator(
         )
     }
 
+    val isRefreshingPlayers by viewModel.isRefreshingPlayers.collectAsStateWithLifecycle()
+
     if (showPicker) {
+        LaunchedEffect(Unit) {
+            viewModel.refreshPlayers()
+        }
         AlertDialog(
             onDismissRequest = { showPicker = false },
-            title = { Text("Selecciona reproductor", color = Color.White, fontWeight = FontWeight.Bold) },
+            title = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.select_player), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    IconButton(
+                        onClick = { viewModel.refreshPlayers() },
+                        enabled = !isRefreshingPlayers,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        if (isRefreshingPlayers) {
+                            CircularProgressIndicator(color = accentColor, strokeWidth = 2.dp, modifier = Modifier.size(16.dp))
+                        } else {
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh_list), tint = accentColor, modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
+            },
             containerColor = Color(0xFF222222),
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    availablePlayers.forEach { player ->
-                        val isSelected = player.id == activePlayer?.id
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) accentColor.copy(alpha = 0.2f) else Color(0xFF1F1F1F))
-                                .clickable {
-                                    viewModel.setActivePlayer(player)
-                                    showPicker = false
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 380.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (availablePlayers.isEmpty()) {
+                        Text(
+                            text = if (isRefreshingPlayers) stringResource(R.string.searching_players) else stringResource(R.string.no_players_found),
+                            color = Color.Gray,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(vertical = 16.dp)
+                        )
+                    } else {
+                        availablePlayers.forEach { player ->
+                            val isSelected = player.id == activePlayer?.id
+                            val isThisDevice = viewModel.isThisDevice(player)
+                            val isSendspin = player.id.contains("sendspin", ignoreCase = true)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) accentColor.copy(alpha = 0.2f) else Color(0xFF1F1F1F))
+                                    .clickable {
+                                        viewModel.setActivePlayer(player)
+                                        showPicker = false
+                                    }
+                                    .padding(14.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = when {
+                                        isThisDevice -> Icons.Default.Smartphone
+                                        player.id.contains("tv", true) -> Icons.Default.Tv
+                                        else -> Icons.Default.Speaker
+                                    },
+                                    contentDescription = null,
+                                    tint = if (isSelected) accentColor else Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(14.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = player.name,
+                                            color = if (isSelected) accentColor else Color.White,
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 14.sp
+                                        )
+                                        if (isThisDevice) {
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(accentColor.copy(alpha = 0.2f))
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.device_this_device),
+                                                    color = accentColor,
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        } else if (isSendspin) {
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(4.dp))
+                                                    .background(accentColor.copy(alpha = 0.2f))
+                                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(R.string.badge_sendspin),
+                                                    color = accentColor,
+                                                    fontSize = 9.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Text(
+                                        text = when {
+                                            isSendspin -> "${stringResource(R.string.desc_sendspin_synced)} • ${if (player.state == "playing") stringResource(R.string.status_playing) else stringResource(R.string.status_ready)}"
+                                            isThisDevice -> stringResource(R.string.desc_local_standalone)
+                                            player.state == "playing" -> stringResource(R.string.status_playing)
+                                            else -> stringResource(R.string.status_inactive)
+                                        },
+                                        fontSize = 11.sp,
+                                        color = if (isSelected) accentColor.copy(alpha = 0.8f) else Color.Gray
+                                    )
                                 }
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = when {
-                                    player.id.contains("tv", true) -> Icons.Default.Tv
-                                    player.id == "local_phone" -> Icons.Default.Smartphone
-                                    player.id.contains("local", true) || player.id.contains("phone", true) -> Icons.Default.PhoneAndroid
-                                    else -> Icons.Default.Speaker
-                                },
-                                contentDescription = null,
-                                tint = if (isSelected) accentColor else Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column {
-                                Text(
-                                    text = player.name,
-                                    color = if (isSelected) accentColor else Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                )
-                                Text(
-                                    text = if (player.state == "playing") "Reproduciendo" else "Inactivo",
-                                    fontSize = 11.sp,
-                                    color = if (isSelected) accentColor.copy(alpha = 0.8f) else Color.Gray
-                                )
                             }
                         }
                     }
@@ -2106,7 +2470,7 @@ fun SpeakerIndicator(
             },
             confirmButton = {
                 TextButton(onClick = { showPicker = false }) {
-                    Text("Cerrar", color = accentColor)
+                    Text(stringResource(R.string.close), color = accentColor)
                 }
             }
         )

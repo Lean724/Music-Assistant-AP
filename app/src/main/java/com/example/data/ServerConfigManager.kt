@@ -70,7 +70,7 @@ class ServerConfigManager(context: Context) {
         set(value) = prefs.edit().putBoolean(KEY_LOCAL_PLAYER_ENABLED, value).apply()
 
     var localPlayerName: String
-        get() = prefs.getString(KEY_LOCAL_PLAYER_NAME, "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}") ?: "Mi Teléfono"
+        get() = prefs.getString(KEY_LOCAL_PLAYER_NAME, "${android.os.Build.MANUFACTURER} ${android.os.Build.MODEL}".trim().ifEmpty { "Dispositivo" }) ?: "Dispositivo"
         set(value) = prefs.edit().putString(KEY_LOCAL_PLAYER_NAME, value.trim()).apply()
 
     var sendspinPort: String

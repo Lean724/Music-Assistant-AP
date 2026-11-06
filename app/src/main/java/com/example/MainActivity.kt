@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.foundation.background
+import androidx.compose.ui.res.stringResource
 import com.example.ui.screens.*
 import com.example.ui.theme.MyApplicationTheme
 import com.example.viewmodel.MusicViewModel
@@ -47,84 +49,175 @@ class MainActivity : ComponentActivity() {
 
                 val currentAccentColor = MaterialTheme.colorScheme.primary
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        NavigationBar(
-                            containerColor = Color(0xFF121212),
-                            contentColor = Color.White,
-                            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-                        ) {
-                            NavigationBarItem(
-                                selected = currentTab == "library",
-                                onClick = { currentTab = "library" },
-                                icon = { Icon(Icons.Default.LibraryMusic, contentDescription = "Biblioteca") },
-                                label = { Text("Biblioteca") },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = Color.Black,
-                                    selectedTextColor = currentAccentColor,
-                                    indicatorColor = currentAccentColor,
-                                    unselectedIconColor = Color.Gray,
-                                    unselectedTextColor = Color.Gray
-                                ),
-                                modifier = Modifier.testTag("library_tab")
-                            )
-                            NavigationBarItem(
-                                selected = currentTab == "queue",
-                                onClick = { currentTab = "queue" },
-                                icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Cola") },
-                                label = { Text("Cola") },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = Color.Black,
-                                    selectedTextColor = currentAccentColor,
-                                    indicatorColor = currentAccentColor,
-                                    unselectedIconColor = Color.Gray,
-                                    unselectedTextColor = Color.Gray
-                                ),
-                                modifier = Modifier.testTag("queue_tab")
-                            )
-                            NavigationBarItem(
-                                selected = currentTab == "settings",
-                                onClick = { currentTab = "settings" },
-                                icon = { Icon(Icons.Default.Settings, contentDescription = "Ajustes") },
-                                label = { Text("Ajustes") },
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = Color.Black,
-                                    selectedTextColor = currentAccentColor,
-                                    indicatorColor = currentAccentColor,
-                                    unselectedIconColor = Color.Gray,
-                                    unselectedTextColor = Color.Gray
-                                ),
-                                modifier = Modifier.testTag("settings_tab")
-                            )
-                        }
-                    },
-                    containerColor = Color(0xFF121212)
-                ) { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = innerPadding.calculateBottomPadding())
-                    ) {
-                        // Render Active Screen based on Tab State
-                        when (currentTab) {
-                            "library" -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                            "queue" -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                            "settings" -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
-                        }
+                BoxWithConstraints(modifier = Modifier.fillMaxSize().background(Color(0xFF121212))) {
+                    val isTablet = maxWidth >= 600.dp
 
-                        // Floating Mini Player docked above bottom bar
-                        val miniPlayerBottomPadding = if (currentTab == "library" || currentTab == "queue") 80.dp else 8.dp
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .padding(bottom = miniPlayerBottomPadding)
-                        ) {
-                            MiniPlayer(
-                                viewModel = viewModel,
-                                onExpand = { showFullPlayer = true }
-                            )
+                    if (isTablet) {
+                        // TABLET LAYOUT: NavigationRail on left, main content on right
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            NavigationRail(
+                                containerColor = Color(0xFF161616),
+                                contentColor = Color.White,
+                                header = {
+                                    Icon(
+                                        Icons.Default.LibraryMusic,
+                                        contentDescription = null,
+                                        tint = currentAccentColor,
+                                        modifier = Modifier.padding(top = 20.dp, bottom = 12.dp).size(28.dp)
+                                    )
+                                },
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start))
+                            ) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                NavigationRailItem(
+                                    selected = currentTab == "library",
+                                    onClick = { currentTab = "library" },
+                                    icon = { Icon(Icons.Default.LibraryMusic, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_library)) },
+                                    label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_library)) },
+                                    colors = NavigationRailItemDefaults.colors(
+                                        selectedIconColor = Color.Black,
+                                        selectedTextColor = currentAccentColor,
+                                        indicatorColor = currentAccentColor,
+                                        unselectedIconColor = Color.Gray,
+                                        unselectedTextColor = Color.Gray
+                                    ),
+                                    modifier = Modifier.testTag("library_tab")
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                NavigationRailItem(
+                                    selected = currentTab == "queue",
+                                    onClick = { currentTab = "queue" },
+                                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
+                                    label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
+                                    colors = NavigationRailItemDefaults.colors(
+                                        selectedIconColor = Color.Black,
+                                        selectedTextColor = currentAccentColor,
+                                        indicatorColor = currentAccentColor,
+                                        unselectedIconColor = Color.Gray,
+                                        unselectedTextColor = Color.Gray
+                                    ),
+                                    modifier = Modifier.testTag("queue_tab")
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                NavigationRailItem(
+                                    selected = currentTab == "settings",
+                                    onClick = { currentTab = "settings" },
+                                    icon = { Icon(Icons.Default.Settings, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
+                                    label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
+                                    colors = NavigationRailItemDefaults.colors(
+                                        selectedIconColor = Color.Black,
+                                        selectedTextColor = currentAccentColor,
+                                        indicatorColor = currentAccentColor,
+                                        unselectedIconColor = Color.Gray,
+                                        unselectedTextColor = Color.Gray
+                                    ),
+                                    modifier = Modifier.testTag("settings_tab")
+                                )
+                            }
+
+                            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                                when (currentTab) {
+                                    "library" -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                    "queue" -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                    "settings" -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                }
+
+                                // Docked Mini Player for tablet
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                                        .padding(bottom = 12.dp, start = 20.dp, end = 20.dp)
+                                ) {
+                                    MiniPlayer(
+                                        viewModel = viewModel,
+                                        onExpand = { showFullPlayer = true }
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // PHONE LAYOUT: Bottom NavigationBar
+                        Scaffold(
+                            modifier = Modifier.fillMaxSize(),
+                            bottomBar = {
+                                NavigationBar(
+                                    containerColor = Color(0xFF121212),
+                                    contentColor = Color.White,
+                                    modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                                ) {
+                                    NavigationBarItem(
+                                        selected = currentTab == "library",
+                                        onClick = { currentTab = "library" },
+                                        icon = { Icon(Icons.Default.LibraryMusic, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_library)) },
+                                        label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_library)) },
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = Color.Black,
+                                            selectedTextColor = currentAccentColor,
+                                            indicatorColor = currentAccentColor,
+                                            unselectedIconColor = Color.Gray,
+                                            unselectedTextColor = Color.Gray
+                                        ),
+                                        modifier = Modifier.testTag("library_tab")
+                                    )
+                                    NavigationBarItem(
+                                        selected = currentTab == "queue",
+                                        onClick = { currentTab = "queue" },
+                                        icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
+                                        label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_queue)) },
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = Color.Black,
+                                            selectedTextColor = currentAccentColor,
+                                            indicatorColor = currentAccentColor,
+                                            unselectedIconColor = Color.Gray,
+                                            unselectedTextColor = Color.Gray
+                                        ),
+                                        modifier = Modifier.testTag("queue_tab")
+                                    )
+                                    NavigationBarItem(
+                                        selected = currentTab == "settings",
+                                        onClick = { currentTab = "settings" },
+                                        icon = { Icon(Icons.Default.Settings, contentDescription = androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
+                                        label = { Text(androidx.compose.ui.res.stringResource(R.string.nav_settings)) },
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = Color.Black,
+                                            selectedTextColor = currentAccentColor,
+                                            indicatorColor = currentAccentColor,
+                                            unselectedIconColor = Color.Gray,
+                                            unselectedTextColor = Color.Gray
+                                        ),
+                                        modifier = Modifier.testTag("settings_tab")
+                                    )
+                                }
+                            },
+                            containerColor = Color(0xFF121212)
+                        ) { innerPadding ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(bottom = innerPadding.calculateBottomPadding())
+                            ) {
+                                when (currentTab) {
+                                    "library" -> LibraryScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                    "queue" -> QueueScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                    "settings" -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                                }
+
+                                val miniPlayerBottomPadding = if (currentTab == "library" || currentTab == "queue") 80.dp else 8.dp
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                                        .padding(bottom = miniPlayerBottomPadding)
+                                ) {
+                                    MiniPlayer(
+                                        viewModel = viewModel,
+                                        onExpand = { showFullPlayer = true }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
