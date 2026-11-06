@@ -9,7 +9,7 @@ class ServerConfigManager(context: Context) {
     private val prefs: SharedPreferences = createSecurePreferences(context)
 
 
-    private companion object {
+    companion object {
         private const val LEGACY_PREFS_NAME = "music_assistant_prefs"
         private const val SECURE_PREFS_NAME = "music_assistant_secure_prefs"
 
@@ -48,7 +48,6 @@ class ServerConfigManager(context: Context) {
         }
     }
 
-    companion object {
         private const val KEY_HOST = "server_host"
         private const val KEY_USERNAME = "server_username"
         private const val KEY_PASSWORD = "server_password"
