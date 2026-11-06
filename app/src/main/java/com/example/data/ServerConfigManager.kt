@@ -2,9 +2,51 @@ package com.example.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 
 class ServerConfigManager(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("music_assistant_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = createSecurePreferences(context)
+
+
+    private companion object {
+        private const val LEGACY_PREFS_NAME = "music_assistant_prefs"
+        private const val SECURE_PREFS_NAME = "music_assistant_secure_prefs"
+
+        private fun createSecurePreferences(context: Context): SharedPreferences {
+            val legacy = context.getSharedPreferences(LEGACY_PREFS_NAME, Context.MODE_PRIVATE)
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            val secure = EncryptedSharedPreferences.create(
+                context,
+                SECURE_PREFS_NAME,
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            // Migrate existing plaintext preferences once. Delete the legacy copy only
+            // after the encrypted transaction has been committed successfully.
+            if (secure.all.isEmpty() && legacy.all.isNotEmpty()) {
+                val editor = secure.edit()
+                legacy.all.forEach { (key, value) ->
+                    when (value) {
+                        is String -> editor.putString(key, value)
+                        is Boolean -> editor.putBoolean(key, value)
+                        is Int -> editor.putInt(key, value)
+                        is Long -> editor.putLong(key, value)
+                        is Float -> editor.putFloat(key, value)
+                        is Set<*> -> editor.putStringSet(key, value.filterIsInstance<String>().toSet())
+                    }
+                }
+                if (editor.commit()) {
+                    legacy.edit().clear().commit()
+                }
+            }
+            return secure
+        }
+    }
 
     companion object {
         private const val KEY_HOST = "server_host"
