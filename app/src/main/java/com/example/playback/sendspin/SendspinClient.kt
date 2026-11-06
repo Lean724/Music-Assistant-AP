@@ -113,13 +113,16 @@ class SendspinClient {
         disconnect("restart") // clean up any prior connection first
 
         staticDelayMs = delayMs
-        val cleanHost = host.trim().removePrefix("http://").removePrefix("https://").substringBefore("/").substringBefore(":")
+        val configuredHost = host.trim()
+        val useTls = configuredHost.startsWith("https://", ignoreCase = true)
+        val cleanHost = configuredHost.removePrefix("http://").removePrefix("https://").substringBefore("/").substringBefore(":")
         if (cleanHost.isEmpty()) {
             _state.value = SendspinState.Error("Host inválido")
             return
         }
         val port = sendspinPort.trim().ifEmpty { "8927" }
-        val wsUrl = "ws://$cleanHost:$port/sendspin"
+        val wsProtocol = if (useTls) "wss" else "ws"
+        val wsUrl = "$wsProtocol://$cleanHost:$port/sendspin"
 
         _state.value = SendspinState.Connecting
         needsRealign = true
@@ -369,7 +372,7 @@ class SendspinClient {
                 else -> { /* ignore anything we don't implement (server/state, etc.) */ }
             }
         } catch (e: Exception) {
-            Log.e("Sendspin", "Error handling message '$text': ${e.message}")
+            Log.e("Sendspin", "Error handling incoming message: ${e.message}")
         }
     }
 
