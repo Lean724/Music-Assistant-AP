@@ -1,0 +1,6 @@
+{
+  "name": "Music Assistant",
+  "description": "Una aplicación elegante y limpia para gestionar y reproducir música desde tu servidor de Music Assistant al estilo Spotify.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
