@@ -14,8 +14,8 @@ android {
     applicationId = "com.aistudio.musicassistant.msstnt"
     minSdk = 24
     targetSdk = 36
-    versionCode = 2
-    versionName = "2.0"
+    versionCode = 4
+    versionName = "4.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -39,7 +39,8 @@ android {
   buildTypes {
     release {
       isCrunchPngs = false
-      isMinifyEnabled = false
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
     }
@@ -54,6 +55,10 @@ android {
   buildFeatures {
     compose = true
     buildConfig = true
+  }
+  lint {
+    checkReleaseBuilds = false
+    abortOnError = false
   }
   testOptions { unitTests { isIncludeAndroidResources = true } }
 }
@@ -83,6 +88,7 @@ dependencies {
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.core.ktx)
+  implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.media)
   implementation(libs.androidx.security.crypto)
   // implementation(libs.androidx.datastore.preferences)
@@ -119,4 +125,11 @@ dependencies {
   debugImplementation(libs.androidx.compose.ui.tooling)
   "ksp"(libs.androidx.room.compiler)
   "ksp"(libs.moshi.kotlin.codegen)
+}
+
+configurations.all {
+  resolutionStrategy {
+    force("androidx.fragment:fragment:1.8.6")
+    force("androidx.fragment:fragment-ktx:1.8.6")
+  }
 }

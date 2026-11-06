@@ -32,7 +32,10 @@ import okhttp3.OkHttpClient
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = androidx.activity.SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+        )
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             val permission = android.Manifest.permission.POST_NOTIFICATIONS
@@ -56,7 +59,11 @@ class MainActivity : ComponentActivity() {
 
                     if (isTablet) {
                         // TABLET LAYOUT: NavigationRail on left, main content on right
-                        Row(modifier = Modifier.fillMaxSize()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .windowInsetsPadding(WindowInsets.safeDrawing)
+                        ) {
                             NavigationRail(
                                 containerColor = Color(0xFF161616),
                                 contentColor = Color.White,
@@ -67,10 +74,7 @@ class MainActivity : ComponentActivity() {
                                         tint = currentAccentColor,
                                         modifier = Modifier.padding(top = 20.dp, bottom = 12.dp).size(28.dp)
                                     )
-                                },
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical + WindowInsetsSides.Start))
+                                }
                             ) {
                                 Spacer(modifier = Modifier.height(8.dp))
                                 NavigationRailItem(
@@ -149,11 +153,11 @@ class MainActivity : ComponentActivity() {
                         // PHONE LAYOUT: Bottom NavigationBar
                         Scaffold(
                             modifier = Modifier.fillMaxSize(),
+                            contentWindowInsets = WindowInsets.safeDrawing,
                             bottomBar = {
                                 NavigationBar(
                                     containerColor = Color(0xFF121212),
-                                    contentColor = Color.White,
-                                    modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                                    contentColor = Color.White
                                 ) {
                                     NavigationBarItem(
                                         selected = pagerState.currentPage == 0,
@@ -204,7 +208,10 @@ class MainActivity : ComponentActivity() {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(bottom = innerPadding.calculateBottomPadding())
+                                    .padding(
+                                        top = innerPadding.calculateTopPadding(),
+                                        bottom = innerPadding.calculateBottomPadding()
+                                    )
                             ) {
                                 androidx.compose.foundation.pager.HorizontalPager(
                                     state = pagerState,

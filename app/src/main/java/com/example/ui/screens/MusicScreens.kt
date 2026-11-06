@@ -2582,6 +2582,7 @@ fun FullScreenPlayerDialog(
     )
 
     Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
