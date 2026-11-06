@@ -609,7 +609,7 @@ class MusicAssistantClient {
                 }
 
                 override fun onMessage(webSocket: WebSocket, text: String) {
-                    Log.d("MusicAssistantWS", "Received message: $text")
+                    Log.d("MusicAssistantWS", "Received WebSocket message")
                     try {
                         val obj = JSONObject(text)
 
@@ -625,7 +625,7 @@ class MusicAssistantClient {
                             if (result != null && result.optBoolean("authenticated", false)) {
                                 sendCommand(webSocket)
                             } else {
-                                Log.e("MusicAssistantWS", "WebSocket authentication failed: $text")
+                                Log.e("MusicAssistantWS", "WebSocket authentication failed")
                                 completer.complete(null)
                                 webSocket.close(1000, "Auth failed")
                             }
