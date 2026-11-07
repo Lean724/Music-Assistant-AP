@@ -1,8 +1,9 @@
 # ProGuard / R8 Rules for MMAC (Minimal Music Assistant Companion)
 
-# Optimization & Obfuscation
--repackageclasses
--allowaccessmodification
+# Android Application Components
+-keep public class com.example.MainActivity
+-keep public class com.example.MusicApplication
+-keep public class com.example.playback.PlaybackService
 
 # Kotlin Reflection & Metadata
 -keepattributes *Annotation*, InnerClasses, EnclosingMethod, Signature, Exceptions

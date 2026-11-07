@@ -1156,50 +1156,52 @@ fun SettingsScreen(
                 modifier = Modifier.padding(bottom = 24.dp, top = 24.dp)
             )
 
-            // 1. Connection Section Card (Submenu Item)
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showServerSubmenu = true }
-                    .padding(bottom = 16.dp)
-            ) {
-                Row(
+            // 1. Connection Section Card (Submenu Item) - Only visible when not in Demo mode
+            AnimatedVisibility(visible = !demoInput) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .clickable { showServerSubmenu = true }
+                        .padding(bottom = 16.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Dns,
-                            contentDescription = stringResource(R.string.server_config),
-                            tint = accentColor,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = stringResource(R.string.server_config),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Dns,
+                                contentDescription = stringResource(R.string.server_config),
+                                tint = accentColor,
+                                modifier = Modifier.size(28.dp)
                             )
-                            val statusText = if (isDemoMode) stringResource(R.string.server_status_demo) else if (currentHost.isNotEmpty()) stringResource(R.string.server_status_configured, currentHost) else stringResource(R.string.server_status_unconfigured)
-                            Text(
-                                text = statusText,
-                                color = Color.Gray,
-                                fontSize = 12.sp
-                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.server_config),
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                )
+                                val statusText = if (isDemoMode) stringResource(R.string.server_status_demo) else if (currentHost.isNotEmpty()) stringResource(R.string.server_status_configured, currentHost) else stringResource(R.string.server_status_unconfigured)
+                                Text(
+                                    text = statusText,
+                                    color = Color.Gray,
+                                    fontSize = 12.sp
+                                )
+                            }
                         }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = "Ir",
+                            tint = Color.Gray
+                        )
                     }
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "Ir",
-                        tint = Color.Gray
-                    )
                 }
             }
 
@@ -1279,6 +1281,9 @@ fun SettingsScreen(
                             checked = demoInput,
                             onCheckedChange = {
                                 demoInput = it
+                                if (it) {
+                                    showServerSubmenu = false
+                                }
                                 // Save immediately on switch toggle
                                 viewModel.saveSettings(hostInput, portInput, usernameInput, passwordInput, tokenInput, it, accentColorInput)
                             },
@@ -1293,173 +1298,179 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 3. Local Player (Sendspin) Card
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+            // 3. Local Player (Sendspin) Card - Only visible when not in Demo mode
+            AnimatedVisibility(visible = !demoInput) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                            Text(stringResource(R.string.local_player_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                            Text(
-                                stringResource(R.string.local_player_desc),
-                                color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp
-                            )
-                        }
-                        Switch(
-                            checked = isLocalPlayerEnabled,
-                            onCheckedChange = { enabled ->
-                                viewModel.setLocalPlayerConfig(enabled, localPlayerNameInput, sendspinPortInput)
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = accentColor,
-                                checkedTrackColor = accentColor.copy(alpha = 0.3f)
-                            )
-                        )
-                    }
-
-                    if (isLocalPlayerEnabled) {
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 12.dp))
-
-                        // Live connection status
-                        val (statusText, statusColor) = when (sendspinState) {
-                            is SendspinState.Disconnected -> stringResource(R.string.status_disconnected) to Color.Gray
-                            is SendspinState.Connecting -> stringResource(R.string.status_connecting) to Color(0xFFEAB308)
-                            is SendspinState.Connected -> stringResource(R.string.status_connected_waiting) to accentColor
-                            is SendspinState.Playing -> stringResource(R.string.status_playing_synced) to Color(0xFF22C55E)
-                            is SendspinState.Buffering -> stringResource(R.string.status_syncing) to Color(0xFFEAB308)
-                            is SendspinState.Error -> "Error: ${(sendspinState as SendspinState.Error).message}" to Color(0xFFEF4444)
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(statusColor)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(statusText, color = statusColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                        }
-
-                        Text(stringResource(R.string.device_name), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                        TextField(
-                            value = localPlayerNameInput,
-                            onValueChange = { localPlayerNameInput = it },
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFF2A2A2A),
-                                unfocusedContainerColor = Color(0xFF2A2A2A),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = accentColor,
-                                unfocusedBorderColor = Color.Transparent
-                            ),
-                            shape = RoundedCornerShape(6.dp),
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                        )
-
-                        Text(stringResource(R.string.sendspin_port), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
-                        TextField(
-                            value = sendspinPortInput,
-                            onValueChange = { sendspinPortInput = it },
-                            placeholder = { Text("8927", color = Color.Gray) },
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = Color(0xFF2A2A2A),
-                                unfocusedContainerColor = Color(0xFF2A2A2A),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                focusedBorderColor = accentColor,
-                                unfocusedBorderColor = Color.Transparent
-                            ),
-                            shape = RoundedCornerShape(6.dp),
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                        )
-
-                        // Speaker Delay Compensation (retardo de altavoz)
-                        Text(stringResource(R.string.speaker_delay), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 2.dp))
-                        Text(
-                            stringResource(R.string.speaker_delay_desc),
-                            color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.padding(bottom = 6.dp)
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
-                            Slider(
-                                value = sendspinDelayInput.toFloat(),
-                                onValueChange = {
-                                    sendspinDelayInput = it.toInt()
-                                    viewModel.setSendspinDelay(sendspinDelayInput)
-                                },
-                                valueRange = -100f..500f,
-                                steps = 11,
-                                modifier = Modifier.weight(1f),
-                                colors = SliderDefaults.colors(
-                                    thumbColor = accentColor,
-                                    activeTrackColor = accentColor,
-                                    inactiveTrackColor = Color(0xFF333333)
-                                )
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "${sendspinDelayInput} ms",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.width(55.dp),
-                                textAlign = TextAlign.End
-                            )
-                        }
-
-                        // Presets
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            listOf(0 to "0 ms", 150 to "150 ms", 300 to "300 ms (BT)").forEach { (ms, label) ->
-                                val isSelected = sendspinDelayInput == ms
-                                Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(if (isSelected) accentColor.copy(alpha = 0.2f) else Color(0xFF2A2A2A))
-                                        .border(
-                                            width = 1.dp,
-                                            color = if (isSelected) accentColor else Color.Transparent,
-                                            shape = RoundedCornerShape(6.dp)
-                                        )
-                                        .clickable {
-                                            sendspinDelayInput = ms
-                                            viewModel.setSendspinDelay(ms)
-                                        }
-                                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                                ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                                    Text(stringResource(R.string.local_player_title), color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                                     Text(
-                                        text = label,
-                                        fontSize = 11.sp,
-                                        color = if (isSelected) accentColor else Color.LightGray,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        stringResource(R.string.local_player_desc),
+                                        color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp
                                     )
                                 }
+                                Switch(
+                                    checked = isLocalPlayerEnabled,
+                                    onCheckedChange = { enabled ->
+                                        viewModel.setLocalPlayerConfig(enabled, localPlayerNameInput, sendspinPortInput)
+                                    },
+                                    colors = SwitchDefaults.colors(
+                                        checkedThumbColor = accentColor,
+                                        checkedTrackColor = accentColor.copy(alpha = 0.3f)
+                                    )
+                                )
+                            }
+
+                            if (isLocalPlayerEnabled) {
+                                HorizontalDivider(color = Color.White.copy(alpha = 0.08f), modifier = Modifier.padding(vertical = 12.dp))
+
+                                // Live connection status
+                                val (statusText, statusColor) = when (sendspinState) {
+                                    is SendspinState.Disconnected -> stringResource(R.string.status_disconnected) to Color.Gray
+                                    is SendspinState.Connecting -> stringResource(R.string.status_connecting) to Color(0xFFEAB308)
+                                    is SendspinState.Connected -> stringResource(R.string.status_connected_waiting) to accentColor
+                                    is SendspinState.Playing -> stringResource(R.string.status_playing_synced) to Color(0xFF22C55E)
+                                    is SendspinState.Buffering -> stringResource(R.string.status_syncing) to Color(0xFFEAB308)
+                                    is SendspinState.Error -> "Error: ${(sendspinState as SendspinState.Error).message}" to Color(0xFFEF4444)
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 12.dp)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(statusColor)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(statusText, color = statusColor, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                                }
+
+                                Text(stringResource(R.string.device_name), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                                TextField(
+                                    value = localPlayerNameInput,
+                                    onValueChange = { localPlayerNameInput = it },
+                                    singleLine = true,
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedContainerColor = Color(0xFF2A2A2A),
+                                        unfocusedContainerColor = Color(0xFF2A2A2A),
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
+                                        focusedBorderColor = accentColor,
+                                        unfocusedBorderColor = Color.Transparent
+                                    ),
+                                    shape = RoundedCornerShape(6.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                                )
+
+                                Text(stringResource(R.string.sendspin_port), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+                                TextField(
+                                    value = sendspinPortInput,
+                                    onValueChange = { sendspinPortInput = it },
+                                    placeholder = { Text("8927", color = Color.Gray) },
+                                    singleLine = true,
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedContainerColor = Color(0xFF2A2A2A),
+                                        unfocusedContainerColor = Color(0xFF2A2A2A),
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
+                                        focusedBorderColor = accentColor,
+                                        unfocusedBorderColor = Color.Transparent
+                                    ),
+                                    shape = RoundedCornerShape(6.dp),
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                                )
+
+                                // Speaker Delay Compensation (retardo de altavoz)
+                                Text(stringResource(R.string.speaker_delay), color = Color.LightGray, fontSize = 12.sp, modifier = Modifier.padding(bottom = 2.dp))
+                                Text(
+                                    stringResource(R.string.speaker_delay_desc),
+                                    color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp, modifier = Modifier.padding(bottom = 6.dp)
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                                    Slider(
+                                        value = sendspinDelayInput.toFloat(),
+                                        onValueChange = {
+                                            sendspinDelayInput = it.toInt()
+                                            viewModel.setSendspinDelay(sendspinDelayInput)
+                                        },
+                                        valueRange = -100f..500f,
+                                        steps = 11,
+                                        modifier = Modifier.weight(1f),
+                                        colors = SliderDefaults.colors(
+                                            thumbColor = accentColor,
+                                            activeTrackColor = accentColor,
+                                            inactiveTrackColor = Color(0xFF333333)
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "${sendspinDelayInput} ms",
+                                        color = Color.White,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.width(55.dp),
+                                        textAlign = TextAlign.End
+                                    )
+                                }
+
+                                // Presets
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    listOf(0 to "0 ms", 150 to "150 ms", 300 to "300 ms (BT)").forEach { (ms, label) ->
+                                        val isSelected = sendspinDelayInput == ms
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(6.dp))
+                                                .background(if (isSelected) accentColor.copy(alpha = 0.2f) else Color(0xFF2A2A2A))
+                                                .border(
+                                                    width = 1.dp,
+                                                    color = if (isSelected) accentColor else Color.Transparent,
+                                                    shape = RoundedCornerShape(6.dp)
+                                                )
+                                                .clickable {
+                                                    sendspinDelayInput = ms
+                                                    viewModel.setSendspinDelay(ms)
+                                                }
+                                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        ) {
+                                            Text(
+                                                text = label,
+                                                fontSize = 11.sp,
+                                                color = if (isSelected) accentColor else Color.LightGray,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Button(
+                                    onClick = { viewModel.setLocalPlayerConfig(true, localPlayerNameInput, sendspinPortInput, sendspinDelayInput) },
+                                    colors = ButtonDefaults.buttonColors(containerColor = accentColor),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(stringResource(R.string.apply_reconnect), color = Color.Black, fontWeight = FontWeight.Bold)
+                                }
+
+                                Text(
+                                    stringResource(R.string.server_info_helper),
+                                    color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp,
+                                    modifier = Modifier.padding(top = 10.dp)
+                                )
                             }
                         }
-
-                        Button(
-                            onClick = { viewModel.setLocalPlayerConfig(true, localPlayerNameInput, sendspinPortInput, sendspinDelayInput) },
-                            colors = ButtonDefaults.buttonColors(containerColor = accentColor),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(stringResource(R.string.apply_reconnect), color = Color.Black, fontWeight = FontWeight.Bold)
-                        }
-
-                        Text(
-                            stringResource(R.string.server_info_helper),
-                            color = Color.Gray, fontSize = 11.sp, lineHeight = 14.sp,
-                            modifier = Modifier.padding(top = 10.dp)
-                        )
                     }
                 }
             }
@@ -1492,7 +1503,7 @@ fun SettingsScreen(
                                 fontSize = 14.sp
                             )
                             Text(
-                                text = stringResource(R.string.about_version),
+                                text = stringResource(R.string.about_version, com.example.BuildConfig.VERSION_NAME),
                                 color = Color.Gray,
                                 fontSize = 11.sp
                             )

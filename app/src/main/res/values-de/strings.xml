@@ -57,7 +57,7 @@
     <string name="speaker_delay">Lautsprecher-Verzögerungsausgleich</string>
     <string name="speaker_delay_desc">Verzögerung (in ms) anpassen, um Audio an andere Lautsprecher oder Bluetooth anzugleichen.</string>
     <string name="about_title">Über MMAC</string>
-    <string name="about_version">Version 1.2 • Unabhängiger schlanker Client</string>
+    <string name="about_version">Version %s • Unabhängiger schlanker Client</string>
     <string name="about_disclaimer">MMAC ist eine vereinfachte und grundlegende App zur Verbindung mit Ihrem Music Assistant-Server. Es ist KEINE offizielle Version und wird von einer einzelnen Person gepflegt.</string>
     <string name="about_attributions">Danksagungen &amp; Mitwirkende</string>
     <string name="add_to_queue">Zur Warteschlange hinzufügen</string>

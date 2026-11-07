@@ -13,7 +13,7 @@ android {
   defaultConfig {
     applicationId = "com.aistudio.musicassistant.msstnt"
     minSdk = 24
-    targetSdk = 36
+    targetSdk = 35
     versionCode = 4
     versionName = "4.0"
 

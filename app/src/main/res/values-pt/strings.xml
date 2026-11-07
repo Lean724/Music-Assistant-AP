@@ -57,7 +57,7 @@
     <string name="speaker_delay">Compensação de retardo (Speaker Delay)</string>
     <string name="speaker_delay_desc">Ajusta o atraso (em ms) para alinhar o áudio deste dispositivo com outros alto-falantes ou fones Bluetooth.</string>
     <string name="about_title">Sobre o MMAC</string>
-    <string name="about_version">Versão 1.2 • Cliente leve independente</string>
+    <string name="about_version">Versão %s • Cliente leve independente</string>
     <string name="about_disclaimer">MMAC é um aplicativo simplificado e básico para conectar ao seu servidor Music Assistant e reproduzir suas músicas. NÃO é uma versão oficial e é mantido atualmente por uma única pessoa.</string>
     <string name="about_attributions">Atribuições e Créditos</string>
     <string name="add_to_queue">Adicionar à fila</string>

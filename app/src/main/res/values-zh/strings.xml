@@ -57,7 +57,7 @@
     <string name="speaker_delay">扬声器延迟补偿 (Speaker Delay)</string>
     <string name="speaker_delay_desc">调整延迟时间 (毫秒)，以与其他房间扬声器精准对齐，或补偿蓝牙耳机延迟。</string>
     <string name="about_title">关于 MMAC</string>
-    <string name="about_version">版本 1.2 • 独立轻量伴侣客户端</string>
+    <string name="about_version">版本 %s • 独立轻量伴侣客户端</string>
     <string name="about_disclaimer">MMAC 是用于连接 Music Assistant 服务器的简化轻量伴侣应用。本项目并非官方版本，目前由个人独立开发与维护。</string>
     <string name="about_attributions">鸣谢与致敬</string>
     <string name="add_to_queue">添加到队列</string>
