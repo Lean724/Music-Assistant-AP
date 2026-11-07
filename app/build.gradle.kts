@@ -15,7 +15,7 @@ android {
     minSdk = 24
     targetSdk = 36
     versionCode = 5
-    versionName = "5.0"
+    versionName = "1.2.5"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -43,6 +43,9 @@ android {
       isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       signingConfig = signingConfigs.getByName("release")
+      ndk {
+        debugSymbolLevel = "FULL"
+      }
     }
     debug {
       signingConfig = signingConfigs.getByName("debugConfig")

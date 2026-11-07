@@ -127,7 +127,21 @@ fun LibraryScreen(
             ),
         contentAlignment = Alignment.TopCenter
     ) {
-        if (selectedArtist != null) {
+        if (selectedAlbum != null) {
+            BackHandler { selectedAlbum = null }
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 900.dp)
+                    .fillMaxSize()
+                    .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+            ) {
+                AlbumDetailView(
+                    album = selectedAlbum!!,
+                    viewModel = viewModel,
+                    onBack = { selectedAlbum = null }
+                )
+            }
+        } else if (selectedArtist != null) {
             BackHandler { selectedArtist = null }
             Column(
                 modifier = Modifier
@@ -140,20 +154,6 @@ fun LibraryScreen(
                     viewModel = viewModel,
                     onBack = { selectedArtist = null },
                     onOpenAlbum = { album -> selectedAlbum = album }
-                )
-            }
-        } else if (selectedAlbum != null) {
-            BackHandler { selectedAlbum = null }
-            Column(
-                modifier = Modifier
-                    .widthIn(max = 900.dp)
-                    .fillMaxSize()
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-            ) {
-                AlbumDetailView(
-                    album = selectedAlbum!!,
-                    viewModel = viewModel,
-                    onBack = { selectedAlbum = null }
                 )
             }
         } else if (selectedPlaylist != null) {
